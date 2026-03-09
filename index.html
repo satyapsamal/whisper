@@ -193,7 +193,7 @@
                 <div class="instruction-footer"><button class="btn" style="background:#222;color:white;min-height:44px" onclick="toggleHelp(false)">Back</button></div>
             </div>
         </div>
-        <button onclick="installPWA()" class="install-btn">
+        <button onclick="installPWA()" class="install-btn" id="install-btn">
             <span class="install-text">Install Whisper in seconds</span>
         </button>
     </div>
@@ -231,7 +231,7 @@
     </div>
     <footer>Conversations stay private and are not tracked.</footer>
     <script>
-        const chatContainer=document.getElementById('chat-container'),msgInput=document.getElementById('msg-input'),peerCodeInput=document.getElementById('peer-code-input'),fileInput=document.getElementById('file-input'),modal=document.getElementById('p2p-modal'),exitBtn=document.getElementById('exit-btn'),headerCallBtn=document.getElementById('header-call-btn'),confirmModal=document.getElementById('confirm-modal'),normalMode=document.getElementById('normal-input-mode'),voiceMode=document.getElementById('voice-input-mode'),visualizer=document.getElementById('visualizer'),timerDisplay=document.getElementById('rec-timer'),suggestionContainer=document.getElementById('suggestion-container'),callOverlay=document.getElementById('call-overlay'),callStatus=document.getElementById('call-status'),callControls=document.getElementById('call-controls'),troubleshootPanel=document.getElementById('troubleshoot-panel'),typingIndicator=document.getElementById('typing-indicator'),connectionStatus=document.getElementById('connection-status'),body=document.body;
+        const chatContainer=document.getElementById('chat-container'),msgInput=document.getElementById('msg-input'),peerCodeInput=document.getElementById('peer-code-input'),fileInput=document.getElementById('file-input'),modal=document.getElementById('p2p-modal'),exitBtn=document.getElementById('exit-btn'),headerCallBtn=document.getElementById('header-call-btn'),confirmModal=document.getElementById('confirm-modal'),normalMode=document.getElementById('normal-input-mode'),voiceMode=document.getElementById('voice-input-mode'),visualizer=document.getElementById('visualizer'),timerDisplay=document.getElementById('rec-timer'),suggestionContainer=document.getElementById('suggestion-container'),callOverlay=document.getElementById('call-overlay'),callStatus=document.getElementById('call-status'),callControls=document.getElementById('call-controls'),troubleshootPanel=document.getElementById('troubleshoot-panel'),typingIndicator=document.getElementById('typing-indicator'),connectionStatus=document.getElementById('connection-status'),body=document.body,installBtn=document.getElementById('install-btn');
         let peer,conn,mediaRecorder,audioChunks=[],recordInterval,startTime,audioContext,analyser,dataArray,animationFrame,localUserSentMessage=false,currentCall=null,localStream=null,callAudioCtx,callAnalyser,callDataArray,callAnimFrame,pendingSeenReceipt=false,connectionAttempts=0,lastAttemptedCode="",typingTimeout,unseenCount=0,titleFlasher=null,deferredPrompt=null,offlineTimer=null,secondsLeft=180;
         peerCodeInput.addEventListener('input',function(e){let val=this.value;if(val.startsWith('WSP-WSP-'))val=val.substring(4);else if(val.includes('WSP-')&&val.indexOf('WSP-')>0)val='WSP-'+val.split('WSP-').join('');if(!val.startsWith('WSP-'))val='WSP-';this.value=val.toUpperCase()});
         peerCodeInput.addEventListener('keydown',function(e){if(this.selectionStart<4&&(e.key==='Backspace'||e.key==='Delete'))e.preventDefault()});
@@ -282,18 +282,34 @@
         function copyLink(){const code=document.getElementById('my-code').textContent;if(code==="..."||code==="COPIED")return;const url=window.location.href.split('?')[0]+'?code='+code;navigator.clipboard.writeText(url).then(()=>{const btn=document.getElementById('link-share-btn');const originalHTML=btn.innerHTML;btn.innerHTML='<span style="font-size:1.2rem">✓</span>';setTimeout(()=>btn.innerHTML=originalHTML,1500)})}
         function toggleHelp(show){const helpView=document.getElementById('instruction-view');helpView.style.display=show?'flex':'none'}
         window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault();deferredPrompt=e});
-        function installPWA(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null})}else{alert("Installation is only supported in Chrome/Edge/Safari. Open this site in one of those browsers.")}}
+        function installPWA(){
+            if(deferredPrompt){
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choice)=>{
+                    if(choice.outcome==='accepted') installBtn.style.display='none';
+                    deferredPrompt=null;
+                });
+            }else{
+                alert("Whisper can only be installed using Chrome, Edge, or Safari. Please open this site in one of these browsers to install the app on your device.");
+            }
+        }
+        // Hide install button if already installed as PWA
+        if(window.matchMedia('(display-mode: standalone)').matches){
+            installBtn.style.display='none';
+        }
+        window.addEventListener('appinstalled',()=>{
+            installBtn.style.display='none';
+        });
         document.addEventListener('contextmenu',event=>event.preventDefault());
         document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&(e.key==='s'||e.key==='S'))e.preventDefault();if((e.ctrlKey||e.metaKey)&&(e.key==='u'||e.key==='U'))e.preventDefault();if(e.key==='F12')e.preventDefault();if((e.ctrlKey||e.metaKey)&&e.shiftKey&&['i','I','j','J','c','C'].includes(e.key))e.preventDefault();if((e.ctrlKey||e.metaKey)&&(e.key==='p'||e.key==='P'))e.preventDefault()});
         window.onload=()=>{initPeer();const urlParams=new URLSearchParams(window.location.search);const code=urlParams.get('code');if(code)document.getElementById('peer-code-input').value=code}
-        if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(reg => console.log('Service Worker registered', reg))
-      .catch(err => console.error('Service Worker failed', err));
-  });
-}  </script>
+        if('serviceWorker' in navigator){
+            window.addEventListener('load',()=>{
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg=>console.log('Service Worker registered',reg))
+                    .catch(err=>console.error('Service Worker failed',err));
+            });
+        }
+    </script>
 </body>
 </html>
-
-
