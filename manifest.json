@@ -3,6 +3,7 @@
   "short_name": "Whisper",
   "start_url": ".",
   "display": "standalone",
+  "scope": "/"
   "background_color": "#000000",
   "theme_color": "#007aff",
   "icons": [
@@ -10,4 +11,5 @@
     {"src": "favicon.webp", "sizes": "512x512", "type": "image/webp"}
   ]
 }
+
 
