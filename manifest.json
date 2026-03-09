@@ -1,5 +1,5 @@
 {
-  "name": "Whisper - Private Messaging",
+  "name": "Whisper | Private Messaging",
   "short_name": "Whisper",
   "start_url": ".",
   "display": "standalone",
@@ -10,3 +10,4 @@
     {"src": "favicon.webp", "sizes": "512x512", "type": "image/webp"}
   ]
 }
+
