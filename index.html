@@ -5,38 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Whisper | Private Messaging</title>
     <meta name="description" content="Whisper is a private, peer-to-peer messaging platform built for secure communication without central servers for free.">
-    <!-- Favicon Integration -->
     <link rel="icon" type="image/webp" href="favicon.webp">
-    <!-- Montserrat Font -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
-     <!-- Google Search Console Verification HTML Tag -->
     <meta name="google-site-verification" content="wM2ym30Va5IGGRkQTmyDT8a1YYxJL40GSyK0jQt0Lio" />
-    <!-- Sharing link template -->
     <meta property="og:type" content="website">
-<meta property="og:url" content="https://satyapsamal.github.io/whisper/">
-<meta property="og:title" content="Whisper | Private Messaging">
-<meta property="og:description" content="Chat fearlessly with Whisper, a messaging platform with no central servers, no tracking, and no control by governments or big tech.">
-<meta property="og:image" content="https://satyapsamal.github.io/whisper/Whisper%20P2P%20Logo.webp">
-
-<meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:url" content="https://satyapsamal.github.io/whisper/">
-<meta property="twitter:title" content="Whisper | Private Messaging">
-<meta property="twitter:description" content="Chat fearlessly with Whisper, a messaging platform with no central servers, no tracking, and no control by governments, big tech, or advertisers.">
-<meta property="twitter:image" content="https://satyapsamal.github.io/whisper/Whisper%20P2P%20Logo.webp">
-    <!-- PeerJS Library for P2P connection -->
+    <meta property="og:url" content="https://satyapsamal.github.io/whisper/">
+    <meta property="og:title" content="Whisper | Private Messaging">
+    <meta property="og:description" content="Chat fearlessly with Whisper, a messaging platform with no central servers, no tracking, and no control by governments or big tech.">
+    <meta property="og:image" content="https://satyapsamal.github.io/whisper/Whisper%20P2P%20Logo.webp">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://satyapsamal.github.io/whisper/">
+    <meta property="twitter:title" content="Whisper | Private Messaging">
+    <meta property="twitter:description" content="Chat fearlessly with Whisper, a messaging platform with no central servers, no tracking, and no control by governments, big tech, or advertisers.">
+    <meta property="twitter:image" content="https://satyapsamal.github.io/whisper/Whisper%20P2P%20Logo.webp">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         :root {
             --bg-color: #000000;
             --text-primary: #ffffff;
-            --accent-blue: #007aff; /* iOS Blue */
+            --accent-blue: #007aff;
             --bubble-bg: #1a1a1a;
             --modal-bg: #0a0a0a;
             --toggle-bg: #39393d;
             --record-red: #ff3b30;
             --call-green: #34c759;
         }
-
         * {
             margin: 0;
             padding: 0;
@@ -45,26 +38,18 @@
             -webkit-tap-highlight-color: transparent;
             scrollbar-width: none;
             -ms-overflow-style: none;
-            
-            /* FEATURE 3: Disable text selection globally */
-            -webkit-user-select: none; /* Safari */
-            -moz-user-select: none; /* Firefox */
-            -ms-user-select: none; /* IE10+/Edge */
-            user-select: none; /* Standard */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
-
-        /* FEATURE 3 EXCEPTION: Allow selection in specific areas */
-        .code-box, 
-        .message,
-        input {
+        .code-box, .message, input {
             -webkit-user-select: text;
             -moz-user-select: text;
             -ms-user-select: text;
             user-select: text;
         }
-
         *::-webkit-scrollbar { display: none; }
-
         body {
             background-color: var(--bg-color);
             color: var(--text-primary);
@@ -74,8 +59,6 @@
             overflow: hidden;
             transition: filter 0.5s ease;
         }
-
-        /* Blur state when modal is active */
         body.modal-active header,
         body.modal-active main,
         body.modal-active .input-wrapper,
@@ -83,7 +66,6 @@
             filter: blur(12px);
             pointer-events: none;
         }
-
         header {
             padding: 15px;
             display: grid;
@@ -95,8 +77,6 @@
             z-index: 10;
             flex-shrink: 0;
         }
-
-        /* Updated Header Title Layout */
         .header-title-container {
             grid-column: 2;
             display: flex;
@@ -104,7 +84,6 @@
             align-items: center;
             justify-content: center;
         }
-
         header h1 {
             font-weight: 600;
             letter-spacing: 2px;
@@ -113,7 +92,6 @@
             text-align: center;
             line-height: 1.2;
         }
-
         .status-text {
             font-size: 0.65rem;
             font-weight: 500;
@@ -122,11 +100,9 @@
             margin-top: 2px;
             transition: color 0.3s ease;
         }
-        
         .status-text.online {
             color: var(--call-green);
         }
-
         #exit-btn {
             background: transparent;
             border: none;
@@ -140,7 +116,6 @@
             height: 40px;
             border-radius: 50%;
         }
-
         .call-btn {
             background: transparent;
             border: none;
@@ -153,7 +128,6 @@
             height: 40px;
         }
         .call-btn svg { width: 22px; height: 22px; fill: currentColor; }
-
         #chat-container {
             flex: 1;
             overflow-y: auto;
@@ -163,7 +137,6 @@
             gap: 12px;
             position: relative;
         }
-
         #suggestion-container {
             position: absolute;
             bottom: 20px;
@@ -175,7 +148,6 @@
             z-index: 5;
             pointer-events: none;
         }
-
         #hello-suggestion {
             background: #222;
             color: white;
@@ -190,7 +162,6 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             transition: transform 0.2s;
         }
-
         .message {
             width: fit-content;
             max-width: 85%;
@@ -203,30 +174,10 @@
             overflow-wrap: break-word;
             display: flex;
             flex-direction: column;
-            /* user-select handled in global rule now */
         }
-
         .message.sent { align-self: flex-end; background: var(--accent-blue); border-bottom-right-radius: 4px; }
         .message.received { align-self: flex-start; background: var(--bubble-bg); border-bottom-left-radius: 4px; }
         .message.system { align-self: center; background: transparent; color: #777; font-size: 0.75rem; text-align: center; border: none; margin: 10px 0; line-height: 1.6; display: block; }
-
-        /* Reply Styles */
-        .reply-context {
-            font-size: 0.75rem;
-            background: rgba(0,0,0,0.15);
-            padding: 6px 10px;
-            border-radius: 12px;
-            margin-bottom: 6px;
-            border-left: 3px solid rgba(255,255,255,0.3);
-            display: flex;
-            flex-direction: column;
-            cursor: pointer;
-        }
-        .message.sent .reply-context { background: rgba(0,0,0,0.1); border-left-color: rgba(255,255,255,0.5); }
-        .reply-sender { font-weight: 600; font-size: 0.65rem; opacity: 0.8; margin-bottom: 2px; text-transform: uppercase; }
-        .reply-text-preview { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.9; }
-
-        /* Meta Data: Time & Seen */
         .msg-meta {
             display: flex;
             justify-content: flex-end;
@@ -239,11 +190,7 @@
         }
         .msg-time { font-weight: 500; }
         .msg-seen { color: #fff; font-weight: 600; display: none; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        /* Show seen only on sent messages when active */
         .message.sent .msg-seen.active { display: block; }
-
-        /* Typing Indicator Styles */
         .typing-bubble {
             display: none;
             align-self: flex-start;
@@ -258,18 +205,14 @@
         .dot:nth-child(2) { animation-delay: 0.2s; }
         .dot:nth-child(3) { animation-delay: 0.4s; }
         @keyframes dotPulse { 0%, 100% { transform: translateY(0); opacity: 0.4; } 50% { transform: translateY(-4px); opacity: 1; } }
-
         .media-container { width: 180px; height: 180px; border-radius: 12px; margin-top: 5px; overflow: hidden; background: #222; cursor: pointer; }
         .media-content { width: 100%; height: 100%; object-fit: cover; filter: blur(25px); transition: filter 0.3s; }
         .media-content.revealed { filter: blur(0); }
-
         .audio-bubble { display: flex; align-items: center; gap: 10px; min-width: 250px; position: relative; }
         .audio-bubble button { background: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #000; z-index: 2; flex-shrink: 0; }
-        
         .playback-viz { display: flex; align-items: center; gap: 3px; height: 24px; flex: 1; padding-right: 5px; }
         .pb-bar { width: 3px; height: 4px; background: rgba(255,255,255,0.4); border-radius: 1.5px; transition: height 0.1s ease; }
         .audio-duration { font-family: monospace; font-size: 0.7rem; opacity: 0.8; color: white; white-space: nowrap; flex-shrink: 0; margin-left: auto; }
-
         #confirm-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8); display: none; align-items: center;
@@ -278,7 +221,6 @@
         .confirm-content { background: #111; border: 1px solid #333; padding: 25px; border-radius: 24px; width: 85%; max-width: 320px; text-align: center; }
         .confirm-actions { display: flex; gap: 10px; margin-top: 20px; }
         .confirm-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; }
-
         #call-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95); display: none; flex-direction: column;
@@ -305,7 +247,6 @@
         .call-action-btn { width: 65px; height: 65px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; }
         .btn-hangup { background: var(--record-red); }
         .btn-accept { background: var(--call-green); }
-
         .spinner {
             display: none; 
             width: 24px; 
@@ -317,7 +258,6 @@
             margin: 0 auto;
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-
         .voice-active-area {
             display: none;
             width: 100%;
@@ -339,41 +279,34 @@
         .v-btn { border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
         .v-cancel { background: #222; color: #777; }
         .v-send { background: var(--record-red); color: white; }
-
-        /* UPDATED MODAL LAYOUT */
         #p2p-modal { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(0,0,0,0.7); 
             display: flex; 
-            flex-direction: column; /* Changed to column for stacking */
-            gap: 15px; /* Spacing between menu and new button */
+            flex-direction: column; 
+            gap: 15px; 
             align-items: center; 
             justify-content: center; 
             z-index: 100; 
         }
-
         .modal-content { 
             background: var(--modal-bg); border: 1px solid #333; padding: 30px; border-radius: 35px; width: 90%; max-width: 400px; 
             text-align: center; animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            max-height: 75vh; /* Adjusted to fit button below */
+            max-height: 75vh; 
             overflow-y: auto;
         }
-        
-        /* Updated Code Box to Flexible Wrapper */
         .code-wrapper {
             display: flex;
             gap: 10px;
             align-items: stretch;
             margin: 10px 0 20px;
         }
-        
         .code-box { 
             background: #111; 
             padding: 15px; 
             border-radius: 12px; 
             font-family: monospace; 
             font-size: 1.2rem; 
-            /* Margin moved to wrapper */
             border: 1px dashed #444; 
             cursor: pointer; 
             color: var(--accent-blue); 
@@ -383,7 +316,6 @@
             align-items: center;
             justify-content: center;
         }
-        
         .link-btn {
             width: 50px;
             background: #111;
@@ -401,15 +333,12 @@
             transform: scale(0.95);
             background: #222;
         }
-        
         .prefs-list { margin: 25px 0 0; display: flex; flex-direction: column; gap: 8px; }
         .pref-item { display: flex; align-items: center; justify-content: space-between; background: #111; padding: 14px 18px; border-radius: 15px; }
         .pref-label { font-size: 0.9rem; color: #eee; font-weight: 400; }
-
         #troubleshoot-panel { display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid #222; animation: fadeIn 0.4s ease; }
         .troubleshoot-title { font-size: 0.75rem; color: var(--record-red); text-transform: uppercase; font-weight: 600; margin-bottom: 12px; }
         .troubleshoot-btn { background: #1a1a1a; color: #eee; font-size: 0.8rem; border: 1px solid #333; padding: 12px; border-radius: 12px; width: 100%; cursor: pointer; margin-bottom: 8px; }
-
         .ios-toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
         .ios-toggle input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--toggle-bg); transition: .3s; border-radius: 34px; }
@@ -417,64 +346,27 @@
         input:checked + .slider { background-color: var(--accent-blue); }
         input:checked + .slider:before { transform: translateX(20px); }
         .btn { background: var(--text-primary); color: black; border: none; padding: 16px 24px; border-radius: 30px; font-weight: 600; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 56px; }
-
         .input-wrapper { padding: 10px 15px 35px 15px; background-color: var(--bg-color); z-index: 60; }
-        
-        /* Reply Preview Bar */
-        #reply-preview-bar {
-            background: #151515;
-            border-top: 1px solid #222;
-            padding: 8px 15px 12px 15px;
-            display: none;
-            align-items: center;
-            justify-content: space-between;
-            color: #ccc;
-            border-top-left-radius: 18px;
-            border-top-right-radius: 18px;
-            margin-bottom: -15px; /* Pull into input area slightly */
-            position: relative;
-            z-index: 1;
-        }
-        .reply-preview-content {
-            border-left: 3px solid var(--accent-blue);
-            padding-left: 10px;
-            display: flex;
-            flex-direction: column;
-            font-size: 0.8rem;
-            max-width: 85%;
-        }
-        .reply-preview-sender { font-size: 0.7rem; color: var(--accent-blue); font-weight: 600; margin-bottom: 2px; }
-        .reply-preview-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.8; }
-        .reply-close-btn { background: transparent; border: none; color: #777; font-size: 1.2rem; cursor: pointer; padding: 5px; }
-
         .input-container { 
             background: #111; border-radius: 40px; display: flex; align-items: center; border: 1px solid #222; padding: 2px; position: relative;
             animation: fluidRainbowShadow 10s linear infinite; height: 56px; overflow: hidden; z-index: 2;
         }
-
         @keyframes fluidRainbowShadow {
             0% { box-shadow: 0 4px 20px -5px rgba(255, 0, 0, 0.4); }
             50% { box-shadow: 0 4px 20px -5px rgba(0, 255, 0, 0.4); }
             100% { box-shadow: 0 4px 20px -5px rgba(255, 0, 255, 0.4); }
         }
-
         #msg-input { flex: 1; background: transparent; border: none; outline: none; color: white; padding: 0 20px; font-size: 1rem; }
         #peer-code-input { flex: 1; background: transparent; border: none; outline: none; color: white; padding: 16px; font-size: 1rem; text-transform: uppercase; text-align: center; }
-
         .action-btn { background: transparent; border: none; color: #666; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; padding: 0 15px; cursor: pointer; }
         .action-btn svg { width: 22px; height: 22px; fill: currentColor; }
         #voice-trigger { color: var(--accent-blue); }
-
         footer { padding: 10px 20px 30px 20px; text-align: center; font-size: 0.85rem; font-weight: 400; color: #666; background: var(--bg-color); }
-
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes modalPop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         #media-viewer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 200; backdrop-filter: blur(10px); }
         #media-viewer img, #media-viewer video { max-width: 95%; max-height: 90%; border-radius: 10px; }
-
-        /* --- UPDATED HELP PAGE STYLES --- */
         .modal-content { position: relative; } 
-        
         #help-trigger {
             margin-top: 20px;
             font-size: 0.8rem;
@@ -487,7 +379,6 @@
             text-decoration: underline;
             color: var(--accent-blue);
         }
-
         #instruction-view {
             display: none; 
             position: absolute;
@@ -503,42 +394,34 @@
             text-align: left;
             overflow: hidden; 
         }
-
-        /* --- FEATURE 2: INSTRUCTION MENU SHADOWS --- */
         .instruction-header {
             padding: 30px 30px 10px 30px;
             background: var(--modal-bg);
             flex-shrink: 0;
-            /* Border removed */
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5); /* Depth Shadow */
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
             z-index: 25;
             position: relative;
         }
-
         .instruction-scroll-content {
             flex: 1;
             overflow-y: auto;
             padding: 20px 30px 10px 30px;
         }
-        
         .instruction-footer {
             padding: 10px 30px 30px 30px;
             background: var(--modal-bg);
             flex-shrink: 0;
             width: 100%;
-            /* Border removed */
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.5); /* Depth Shadow */
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
             z-index: 25;
             position: relative;
         }
-
         #instruction-view h2 {
             font-size: 1.2rem;
             text-align: center;
             color: white;
             margin: 0;
         }
-
         .help-section { margin-bottom: 25px; }
         .help-section h3 {
             font-size: 0.95rem;
@@ -568,13 +451,11 @@
             color: #fff;
             font-weight: 600;
         }
-
-        /* --- NEW FEATURE: LINKEDIN BUTTON STYLES --- */
         .linkedin-btn {
             background: var(--modal-bg);
             border: 1px solid #333;
             padding: 20px 30px;
-            border-radius: 35px; /* Matches .modal-content exactly */
+            border-radius: 35px;
             width: 90%;
             max-width: 400px;
             display: flex;
@@ -582,11 +463,10 @@
             justify-content: space-between;
             text-decoration: none;
             color: white;
-            margin-top: 0; /* Handled by parent gap */
+            margin-top: 0;
             transition: transform 0.2s, background 0.2s;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            /* Consistent with modal entry animation but delayed */
             animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             animation-fill-mode: backwards;
             animation-delay: 0.1s;
@@ -627,31 +507,23 @@
         <div class="modal-content">
             <h2 style="margin-bottom: 25px;">Whisper Fearlessly.</h2>
             <p style="font-size: 0.7rem; opacity: 0.5; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Your connection code:</p>
-            
-            <!-- FEATURE 3: Link Symbol and Flexible Wrapper -->
             <div class="code-wrapper">
                 <div class="code-box" id="my-code" onclick="copyCode()" style="margin: 0; flex: 1;">...</div>
                 <button class="link-btn" id="link-share-btn" onclick="copyLink()">
                     <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
                 </button>
             </div>
-            
-            <!-- FEATURE 1: UPDATED LABEL STYLE -->
             <p style="font-size: 0.7rem; opacity: 0.5; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Paste friends' connection code:</p>
-            
             <input type="text" id="peer-code-input" value="WSP-" style="border: 1px solid #333; margin: 0 0 12px; background: #000; width: 100%; border-radius: 18px; color: white; outline: none;">
-            
             <button class="btn" id="connect-btn" onclick="handleConnectClick()">
                 <span id="btn-text">Connect Privately</span>
                 <div class="spinner" id="btn-spinner"></div>
             </button>
-
             <div id="troubleshoot-panel">
                 <div class="troubleshoot-title">Troubleshooting required</div>
                 <button class="troubleshoot-btn" onclick="location.reload()">Refresh & Try Again</button>
                 <p style="font-size: 0.65rem; color: #555;">If connection fails, both users should refresh the page.</p>
             </div>
-
             <div class="prefs-list">
                 <div class="pref-item">
                     <span class="pref-label">Swiss Protection</span>
@@ -675,16 +547,11 @@
                     </label>
                 </div>
             </div>
-
-            <!-- New Feature: Getting Started Link -->
             <div id="help-trigger" onclick="toggleHelp(true)">Getting Started with Whisper?</div>
-
-            <!-- Instruction Page (Overlay) -->
             <div id="instruction-view">
                 <div class="instruction-header">
                     <h2>Getting Started with Whisper</h2>
                 </div>
-                
                 <div class="instruction-scroll-content">
                     <div class="help-section">
                         <h3>Create a new private chat</h3>
@@ -694,7 +561,6 @@
                             <li>Your friend pastes the code and taps Connect Privately to join.</li>
                         </ul>
                     </div>
-
                     <div class="help-section">
                         <h3>Join an existing chat</h3>
                         <ul>
@@ -703,7 +569,6 @@
                             <li>Tap Connect Privately to enter the chat.</li>
                         </ul>
                     </div>
-
                     <div class="help-section">
                         <h3>Optional privacy controls</h3>
                         <ul>
@@ -713,14 +578,11 @@
                         </ul>
                     </div>
                 </div>
-
                 <div class="instruction-footer">
                     <button class="btn" style="background: #222; color: white; min-height: 44px;" onclick="toggleHelp(false)">Back</button>
                 </div>
             </div>
         </div>
-        
-        <!-- NEW FEATURE: LINKEDIN BUTTON (Below the modal content) -->
         <a href="https://in.linkedin.com/in/satyaprakashsamal" target="_blank" class="linkedin-btn">
             <span class="linkedin-text">Follow on LinkedIn</span>
             <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
@@ -731,20 +593,16 @@
 
     <header>
         <button id="exit-btn" onclick="toggleConfirm(true)">&lsaquo;</button>
-        
-        <!-- Updated Header Title with Status -->
         <div class="header-title-container">
             <h1>Whisper</h1>
             <div id="connection-status" class="status-text">(Offline)</div>
         </div>
-        
         <button id="header-call-btn" class="call-btn" onclick="initiateVoiceCall()">
             <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
         </button>
     </header>
 
     <main id="chat-container">
-        <!-- Typing Indicator Container -->
         <div id="typing-indicator" class="typing-bubble">
             <div class="dots">
                 <div class="dot"></div>
@@ -758,14 +616,6 @@
     </main>
 
     <div class="input-wrapper">
-        <div id="reply-preview-bar">
-            <div class="reply-preview-content">
-                <span class="reply-preview-sender" id="reply-preview-sender">Replying to...</span>
-                <span class="reply-preview-text" id="reply-preview-text">Message content</span>
-            </div>
-            <button class="reply-close-btn" onclick="cancelReply()">×</button>
-        </div>
-
         <div class="input-container" id="input-container">
             <div id="normal-input-mode" style="display: flex; width: 100%; align-items: center;">
                 <button class="action-btn" onclick="document.getElementById('file-input').click()">+</button>
@@ -774,7 +624,6 @@
                     <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
                 </button>
             </div>
-            
             <div id="voice-input-mode" class="voice-active-area">
                 <div class="voice-visualizer" id="visualizer"></div>
                 <div class="voice-timer" id="rec-timer">0:00</div>
@@ -783,7 +632,6 @@
                     <button class="v-btn v-send" onclick="stopRecording(true)">↑</button>
                 </div>
             </div>
-
             <input type="file" id="file-input" style="display: none;" accept="image/*,video/*">
         </div>
     </div>
@@ -810,9 +658,6 @@
         const troubleshootPanel = document.getElementById('troubleshoot-panel');
         const typingIndicator = document.getElementById('typing-indicator');
         const connectionStatus = document.getElementById('connection-status');
-        const replyPreviewBar = document.getElementById('reply-preview-bar');
-        const replyPreviewSender = document.getElementById('reply-preview-sender');
-        const replyPreviewText = document.getElementById('reply-preview-text');
         const body = document.body;
         
         let peer, conn, mediaRecorder, audioChunks = [], recordInterval, startTime, audioContext, analyser, dataArray, animationFrame;
@@ -821,70 +666,100 @@
         let localStream = null;
         let callAudioCtx, callAnalyser, callDataArray, callAnimFrame;
         let pendingSeenReceipt = false;
-        
         let connectionAttempts = 0;
         let lastAttemptedCode = "";
         let typingTimeout;
         
-        let currentReplyContext = null;
+        let unseenCount = 0;
+        let titleFlasher = null;
+        let offlineTimer = null;
+        let secondsLeft = 180;
 
         peerCodeInput.addEventListener('input', function(e) {
             let val = this.value;
-            if (val.startsWith('WSP-WSP-')) {
-                val = val.substring(4);
-            } else if (val.includes('WSP-') && val.indexOf('WSP-') > 0) {
-                val = 'WSP-' + val.split('WSP-').join('');
-            }
-            if (!val.startsWith('WSP-')) {
-                val = 'WSP-';
-            }
+            if (val.startsWith('WSP-WSP-')) val = val.substring(4);
+            else if (val.includes('WSP-') && val.indexOf('WSP-') > 0) val = 'WSP-' + val.split('WSP-').join('');
+            if (!val.startsWith('WSP-')) val = 'WSP-';
             this.value = val.toUpperCase();
         });
 
         peerCodeInput.addEventListener('keydown', function(e) {
-            if (this.selectionStart < 4 && (e.key === 'Backspace' || e.key === 'Delete')) {
-                e.preventDefault();
-            }
+            if (this.selectionStart < 4 && (e.key === 'Backspace' || e.key === 'Delete')) e.preventDefault();
         });
 
-        // Close connection on tab/window close
         window.addEventListener('beforeunload', () => {
-            if (conn && conn.open) {
-                conn.send('WHISPER_EXIT');
-            }
+            if (conn && conn.open) conn.send('WHISPER_EXIT');
         });
 
-        // --- NEW VISIBILITY & STATUS LOGIC ---
         function sendVisibilityStatus() {
             if (!conn || !conn.open) return;
             const status = document.visibilityState === 'visible' ? 'WHISPER_STATUS_ONLINE' : 'WHISPER_STATUS_OFFLINE';
             conn.send(status);
-            
-            // Also send seen receipt if visible and pending
             if (document.visibilityState === 'visible' && pendingSeenReceipt) {
                 conn.send('WHISPER_SEEN');
                 pendingSeenReceipt = false;
             }
         }
 
-        document.addEventListener('visibilitychange', sendVisibilityStatus);
+        document.addEventListener('visibilitychange', () => {
+            sendVisibilityStatus();
+            if (document.visibilityState === 'visible') {
+                unseenCount = 0;
+                updateTitle();
+            }
+        });
+
+        function updateTitle() {
+            document.title = unseenCount > 0 ? `(${unseenCount}) Messages | Whisper` : "Whisper | Private Messaging";
+        }
+
+        function startIncomingCallFlasher() {
+            if (titleFlasher) clearInterval(titleFlasher);
+            let toggle = true;
+            titleFlasher = setInterval(() => {
+                document.title = toggle ? "Incoming Call | Whisper" : "Whisper | Private Messaging";
+                toggle = !toggle;
+            }, 250);
+        }
+
+        function stopFlasher() {
+            if (titleFlasher) {
+                clearInterval(titleFlasher);
+                titleFlasher = null;
+            }
+        }
+
+        function setCallTitle() {
+            stopFlasher();
+            document.title = "Call in Progress | Whisper";
+        }
+
+        function startOfflineCountdown() {
+            if (offlineTimer) clearInterval(offlineTimer);
+            secondsLeft = 180;
+            connectionStatus.textContent = `(Offline | Chat closes in ${secondsLeft}s)`;
+            offlineTimer = setInterval(() => {
+                secondsLeft--;
+                connectionStatus.textContent = `(Offline | Chat closes in ${secondsLeft}s)`;
+                if (secondsLeft <= 0) {
+                    clearInterval(offlineTimer);
+                    appendMessage("Chat closed. Link expired.", 'system');
+                    handleDisconnect();
+                }
+            }, 1000);
+        }
 
         function updatePeerStatus(isOnline) {
             if (isOnline) {
                 connectionStatus.textContent = "(Online)";
                 connectionStatus.classList.add('online');
+                if (offlineTimer) {
+                    clearInterval(offlineTimer);
+                    offlineTimer = null;
+                }
             } else {
-                connectionStatus.textContent = "(Offline)";
                 connectionStatus.classList.remove('online');
-            }
-        }
-        // -------------------------------------
-
-        function sendSeenIfVisible() {
-            if (document.visibilityState === 'visible') {
-                if(conn && conn.open) conn.send('WHISPER_SEEN');
-            } else {
-                pendingSeenReceipt = true;
+                startOfflineCountdown();
             }
         }
 
@@ -906,7 +781,6 @@
             time.className = 'msg-time';
             time.textContent = getCurrentTime();
             meta.appendChild(time);
-            
             if (isSent) {
                 const seen = document.createElement('span');
                 seen.className = 'msg-seen';
@@ -918,10 +792,7 @@
 
         function markLastSeen() {
             const sentMessages = document.querySelectorAll('.message.sent .msg-seen');
-            if (sentMessages.length > 0) {
-                const last = sentMessages[sentMessages.length - 1];
-                last.classList.add('active');
-            }
+            if (sentMessages.length > 0) sentMessages[sentMessages.length - 1].classList.add('active');
         }
 
         function initPeer() {
@@ -946,22 +817,18 @@
         function handleConnectClick() {
             const rawId = peerCodeInput.value.trim();
             if (!rawId || rawId.length <= 4) return;
-
             const normalizedId = rawId.toUpperCase();
-            if (normalizedId === lastAttemptedCode) {
-                connectionAttempts++;
-            } else {
+            if (normalizedId === lastAttemptedCode) connectionAttempts++;
+            else {
                 connectionAttempts = 1;
                 lastAttemptedCode = normalizedId;
             }
-
             const btnText = document.getElementById('btn-text');
             const btnSpinner = document.getElementById('btn-spinner');
             const connectBtn = document.getElementById('connect-btn');
             btnText.style.display = 'none';
             btnSpinner.style.display = 'block';
             connectBtn.disabled = true;
-
             setTimeout(() => connectToPeer(normalizedId), 2000);
         }
 
@@ -969,38 +836,27 @@
             document.getElementById('btn-text').style.display = 'block';
             document.getElementById('btn-spinner').style.display = 'none';
             document.getElementById('connect-btn').disabled = false;
-            
-            if (connectionAttempts >= 2) {
-                troubleshootPanel.style.display = 'block';
-            }
+            if (connectionAttempts >= 2) troubleshootPanel.style.display = 'block';
         }
 
         function connectToPeer(peerId) {
             conn = peer.connect(peerId, { reliable: true });
-
             const connectionTimeout = setTimeout(() => {
-                if (!conn.open) {
-                    resetConnectButton();
-                }
+                if (!conn.open) resetConnectButton();
             }, 6000);
-
             conn.on('open', () => {
                 clearTimeout(connectionTimeout);
                 body.classList.remove('modal-active');
                 modal.style.display = 'none';
                 exitBtn.style.display = 'flex';
                 headerCallBtn.style.display = 'flex';
-                
-                // --- Send initial status when opening ---
                 sendVisibilityStatus();
-                updatePeerStatus(true); // Assume online initially
-                
+                updatePeerStatus(true);
                 appendMessage("Private connection active. No government, big tech, or trackers involved.", 'system');
                 if(!localUserSentMessage) suggestionContainer.style.display = 'flex';
                 conn.on('data', handleIncomingData);
                 conn.on('close', () => handleDisconnect());
             });
-
             conn.on('error', () => {
                 clearTimeout(connectionTimeout);
                 resetConnectButton();
@@ -1013,11 +869,8 @@
                 modal.style.display = 'none';
                 exitBtn.style.display = 'flex';
                 headerCallBtn.style.display = 'flex';
-                
-                // --- Send initial status when accepting ---
                 sendVisibilityStatus();
-                updatePeerStatus(true); // Assume online initially
-                
+                updatePeerStatus(true);
                 appendMessage("Private connection active. No government, big tech, or trackers involved.", 'system');
                 if(!localUserSentMessage) suggestionContainer.style.display = 'flex';
                 conn.on('data', handleIncomingData);
@@ -1026,10 +879,8 @@
         }
 
         function handleDisconnect() {
-            if (msgInput.disabled) return; 
-
+            if (msgInput.disabled) return;
             const autoDelete = document.getElementById('pref-auto-delete').checked;
-            
             if (autoDelete) {
                 const indicator = typingIndicator.cloneNode(true);
                 const suggestions = suggestionContainer.cloneNode(true);
@@ -1037,15 +888,15 @@
                 chatContainer.appendChild(indicator);
                 chatContainer.appendChild(suggestions);
             }
-            
             appendMessage("Private connection ended. This chat left no traces.", 'system');
-            
             msgInput.disabled = true;
             msgInput.placeholder = "CONNECTION ENDED";
             document.getElementById('voice-trigger').style.display = 'none';
             document.getElementById('file-input').disabled = true;
             headerCallBtn.style.display = 'none';
             updatePeerStatus(false);
+            stopFlasher();
+            document.title = "Whisper | Private Messaging";
         }
 
         async function initiateVoiceCall() {
@@ -1055,15 +906,14 @@
                 currentCall = peer.call(conn.peer, localStream);
                 showCallOverlay("Calling...");
                 renderCallControls([ { label: '✕', class: 'btn-hangup', action: () => endCall(false) } ]);
-                
                 setupRippleFeedback(localStream);
-
                 currentCall.on('stream', (remoteStream) => {
                     setupRippleFeedback(remoteStream);
                     callStatus.textContent = "You’re on a private call";
                     const audio = new Audio();
                     audio.srcObject = remoteStream;
                     audio.play();
+                    setCallTitle();
                 });
                 currentCall.on('close', () => endCall(true));
             } catch (err) { appendMessage("Could not access microphone.", "system"); }
@@ -1072,6 +922,7 @@
         function showIncomingCallUI(incomingCall) {
             currentCall = incomingCall;
             showCallOverlay("Someone’s calling you privately");
+            startIncomingCallFlasher();
             renderCallControls([
                 { label: '✕', class: 'btn-hangup', action: () => { currentCall.close(); endCall(false); } },
                 { label: '✓', class: 'btn-accept', action: acceptIncomingCall }
@@ -1084,13 +935,13 @@
                 currentCall.answer(localStream);
                 callStatus.textContent = "Connecting...";
                 renderCallControls([ { label: '✕', class: 'btn-hangup', action: () => endCall(false) } ]);
-
                 currentCall.on('stream', (remoteStream) => {
                     setupRippleFeedback(remoteStream);
                     callStatus.textContent = "You’re on a private call";
                     const audio = new Audio();
                     audio.srcObject = remoteStream;
                     audio.play();
+                    setCallTitle();
                 });
                 currentCall.on('close', () => endCall(true));
             } catch (err) { endCall(false); }
@@ -1099,7 +950,6 @@
         function setupRippleFeedback(stream) {
             if (callAnimFrame) cancelAnimationFrame(callAnimFrame);
             if (callAudioCtx) callAudioCtx.close();
-
             callAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const source = callAudioCtx.createMediaStreamSource(stream);
             callAnalyser = callAudioCtx.createAnalyser();
@@ -1112,16 +962,13 @@
         function animateRipples() {
             callAnimFrame = requestAnimationFrame(animateRipples);
             callAnalyser.getByteFrequencyData(callDataArray);
-            
             let sum = 0;
             for(let i=0; i < callDataArray.length; i++) sum += callDataArray[i];
             const volume = sum / callDataArray.length;
-            
             const scale = volume / 128; 
             const ripple1 = document.getElementById('ripple-1');
             const ripple2 = document.getElementById('ripple-2');
             const ripple3 = document.getElementById('ripple-3');
-
             if (scale > 0.05) {
                 ripple1.style.opacity = 0.8;
                 ripple1.style.transform = `scale(${1 + scale * 0.8})`;
@@ -1138,10 +985,7 @@
         }
 
         function endCall(isRemote = false) {
-            if (!isRemote && conn && conn.open) {
-                conn.send('WHISPER_CALL_TERMINATED');
-            }
-
+            if (!isRemote && conn && conn.open) conn.send('WHISPER_CALL_TERMINATED');
             if (currentCall) currentCall.close();
             if (localStream) {
                 localStream.getTracks().forEach(t => t.stop());
@@ -1149,14 +993,12 @@
             }
             if (callAnimFrame) cancelAnimationFrame(callAnimFrame);
             if (callAudioCtx) callAudioCtx.close();
-            
             callOverlay.style.display = 'none';
             currentCall = null;
-            
             const lastMsg = chatContainer.lastElementChild;
-            if (lastMsg && lastMsg.textContent !== "Private call ended") {
-                appendMessage("Private call ended", 'system');
-            }
+            if (lastMsg && lastMsg.textContent !== "Private call ended") appendMessage("Private call ended", 'system');
+            stopFlasher();
+            updateTitle();
         }
 
         function showCallOverlay(status) {
@@ -1180,8 +1022,6 @@
                 handleDisconnect();
                 return;
             }
-            
-            // --- HANDLE STATUS UPDATES ---
             if (data === 'WHISPER_STATUS_ONLINE') {
                 updatePeerStatus(true);
                 return;
@@ -1190,50 +1030,35 @@
                 updatePeerStatus(false);
                 return;
             }
-            // ----------------------------
-
-            // --- HANDLE REPLIES ---
-            if (typeof data === 'string' && data.startsWith('WHISPER_REP_JSON_')) {
-                const jsonStr = data.replace('WHISPER_REP_JSON_', '');
-                try {
-                    const replyData = JSON.parse(jsonStr);
-                    showTypingIndicator(false);
-                    appendMessage(replyData.text, 'received', replyData.context);
-                    sendSeenIfVisible();
-                } catch(e) {}
-                return;
-            }
-
             if (data === 'WHISPER_CALL_TERMINATED') {
                 endCall(true); 
                 return;
             }
-
             if (data === 'WHISPER_SEEN') {
                 markLastSeen();
                 return;
             }
-
             if (data === 'WHISPER_TYPING_ON') {
                 showTypingIndicator(true);
+                return;
             } else if (data === 'WHISPER_TYPING_OFF') {
                 showTypingIndicator(false);
-            } else if (typeof data === 'string' && data.startsWith('WHISPER_AUD_')) {
-                showTypingIndicator(false);
+                return;
+            }
+            showTypingIndicator(false);
+            if (typeof data === 'string' && data.startsWith('WHISPER_AUD_')) {
                 appendAudioMessage(data.replace('WHISPER_AUD_', ''), 'received');
-                sendSeenIfVisible();
             } else if (typeof data === 'string' && data.startsWith('WHISPER_IMG_')) {
-                showTypingIndicator(false);
                 appendMediaMessage(data.replace('WHISPER_IMG_', ''), 'image', 'received');
-                sendSeenIfVisible();
             } else if (typeof data === 'string' && data.startsWith('WHISPER_VID_')) {
-                showTypingIndicator(false);
                 appendMediaMessage(data.replace('WHISPER_VID_', ''), 'video', 'received');
-                sendSeenIfVisible();
             } else {
-                showTypingIndicator(false);
                 appendMessage(data, 'received');
-                sendSeenIfVisible();
+            }
+            sendSeenIfVisible();
+            if (document.visibilityState !== 'visible') {
+                unseenCount++;
+                updateTitle();
             }
         }
 
@@ -1268,7 +1093,6 @@
                 analyser.fftSize = 64;
                 source.connect(analyser);
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
-                
                 mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
                 mediaRecorder.onstop = () => {
                     const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
@@ -1334,30 +1158,25 @@
             const durationSpan = document.createElement('span');
             durationSpan.className = 'audio-duration';
             const audio = new Audio(src);
-            
             const formatTime = (time) => {
                 const m = Math.floor(time / 60);
                 const s = Math.floor(time % 60).toString().padStart(2, '0');
                 return `${m}:${s}`;
             };
-
             audio.onloadedmetadata = () => {
                 const totalDur = isNaN(audio.duration) ? 0 : audio.duration;
                 durationSpan.textContent = `0:00 / ${formatTime(totalDur)}`;
             };
-
             audio.ontimeupdate = () => {
                 const current = formatTime(audio.currentTime);
                 const total = formatTime(audio.duration || 0);
                 durationSpan.textContent = `${current} / ${total}`;
             };
-
             audio.onended = () => {
                 playBtn.innerHTML = '▶';
                 const total = formatTime(audio.duration || 0);
                 durationSpan.textContent = `0:00 / ${total}`;
             };
-
             playBtn.onclick = () => {
                 if (audio.paused) { audio.play(); playBtn.innerHTML = '⏸'; }
                 else { audio.pause(); playBtn.innerHTML = '▶'; }
@@ -1367,43 +1186,20 @@
             container.appendChild(durationSpan);
             msgDiv.appendChild(container);
             msgDiv.appendChild(createMetaElement(sender === 'sent'));
-
             const indicator = document.getElementById('typing-indicator');
             if (indicator) chatContainer.insertBefore(msgDiv, indicator);
             else chatContainer.appendChild(msgDiv);
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
-        function appendMessage(text, type, replyContext = null) {
+        function appendMessage(text, type) {
             if (text === "") return;
             if (type === 'sent') markSent();
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${type}`;
-            
-            // Double click to reply
-            msgDiv.ondblclick = () => {
-                initiateReply(text, type === 'sent' ? 'You' : 'Friend');
-            };
-
-            // Render Reply Context if exists
-            if (replyContext) {
-                const replyDiv = document.createElement('div');
-                replyDiv.className = 'reply-context';
-                replyDiv.innerHTML = `
-                    <span class="reply-sender">${replyContext.sender}</span>
-                    <span class="reply-text-preview">${replyContext.text}</span>
-                `;
-                replyDiv.onclick = (e) => { e.stopPropagation(); /* Scroll to msg could be added here */ };
-                msgDiv.appendChild(replyDiv);
-            }
-
             const textNode = document.createTextNode(text);
             msgDiv.appendChild(textNode);
-
-            if (type !== 'system') {
-                msgDiv.appendChild(createMetaElement(type === 'sent'));
-            }
-
+            if (type !== 'system') msgDiv.appendChild(createMetaElement(type === 'sent'));
             const indicator = document.getElementById('typing-indicator');
             if (indicator) chatContainer.insertBefore(msgDiv, indicator);
             else chatContainer.appendChild(msgDiv);
@@ -1426,7 +1222,6 @@
             container.appendChild(el);
             msgDiv.appendChild(container);
             msgDiv.appendChild(createMetaElement(sender === 'sent'));
-
             const indicator = document.getElementById('typing-indicator');
             if (indicator) chatContainer.insertBefore(msgDiv, indicator);
             else chatContainer.appendChild(msgDiv);
@@ -1440,48 +1235,20 @@
             el.src = src; if(type === 'video') el.controls = true;
             viewer.appendChild(el); viewer.style.display = 'flex';
         }
-        
-        // --- REPLY LOGIC ---
-        function initiateReply(text, sender) {
-            currentReplyContext = { text: text, sender: sender };
-            replyPreviewSender.textContent = `Replying to ${sender}`;
-            replyPreviewText.textContent = text;
-            replyPreviewBar.style.display = 'flex';
-            msgInput.focus();
-        }
-
-        function cancelReply() {
-            currentReplyContext = null;
-            replyPreviewBar.style.display = 'none';
-        }
 
         msgInput.addEventListener('input', () => {
             if (!conn?.open) return;
             conn.send('WHISPER_TYPING_ON');
             clearTimeout(typingTimeout);
-            typingTimeout = setTimeout(() => {
-                conn.send('WHISPER_TYPING_OFF');
-            }, 2000);
+            typingTimeout = setTimeout(() => conn.send('WHISPER_TYPING_OFF'), 2000);
         });
 
         msgInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && msgInput.value.trim() !== '' && conn?.open) {
                 const val = msgInput.value.trim();
                 conn.send('WHISPER_TYPING_OFF');
-                
-                if (currentReplyContext) {
-                    const payload = {
-                        text: val,
-                        context: currentReplyContext
-                    };
-                    conn.send('WHISPER_REP_JSON_' + JSON.stringify(payload));
-                    appendMessage(val, 'sent', currentReplyContext);
-                    cancelReply();
-                } else {
-                    conn.send(val);
-                    appendMessage(val, 'sent');
-                }
-                
+                conn.send(val);
+                appendMessage(val, 'sent');
                 msgInput.value = '';
                 clearTimeout(typingTimeout);
             }
@@ -1510,13 +1277,10 @@
             setTimeout(() => document.getElementById('my-code').textContent = original, 1000);
         }
 
-        // --- FEATURE 3 JS: COPY LINK & AUTO-CONNECT ---
         function copyLink() {
             const code = document.getElementById('my-code').textContent;
             if(code === "..." || code === "COPIED") return;
-            
             const url = window.location.href.split('?')[0] + '?code=' + code;
-            
             navigator.clipboard.writeText(url).then(() => {
                 const btn = document.getElementById('link-share-btn');
                 const originalHTML = btn.innerHTML;
@@ -1527,50 +1291,23 @@
 
         function toggleHelp(show) {
             const helpView = document.getElementById('instruction-view');
-            if (show) {
-                helpView.style.display = 'flex';
-            } else {
-                helpView.style.display = 'none';
-            }
+            helpView.style.display = show ? 'flex' : 'none';
         }
 
-        // --- FEATURE: SECURITY & RESTRICTIONS ---
-        // 1. Disable Right-Click Context Menu
         document.addEventListener('contextmenu', event => event.preventDefault());
-
-        // 2. Disable Keyboard Shortcuts (Save, View Source, Inspect, Print)
         document.addEventListener('keydown', function(e) {
-            // Cmd/Ctrl + S (Save)
-            if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
-                e.preventDefault();
-            }
-            // Cmd/Ctrl + U (View Source)
-            if ((e.ctrlKey || e.metaKey) && (e.key === 'u' || e.key === 'U')) {
-                e.preventDefault();
-            }
-            // F12 (Dev Tools)
-            if (e.key === 'F12') {
-                e.preventDefault();
-            }
-            // Cmd/Ctrl + Shift + I/J/C (Dev Tools)
-            if ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'I', 'j', 'J', 'c', 'C'].includes(e.key)) {
-                e.preventDefault();
-            }
-            // Cmd/Ctrl + P (Print)
-            if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P')) {
-                e.preventDefault();
-            }
+            if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) e.preventDefault();
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'u' || e.key === 'U')) e.preventDefault();
+            if (e.key === 'F12') e.preventDefault();
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'I', 'j', 'J', 'c', 'C'].includes(e.key)) e.preventDefault();
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P')) e.preventDefault();
         });
 
         window.onload = () => {
             initPeer();
-            
-            // Auto-Connect Logic
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
-            if(code) {
-                document.getElementById('peer-code-input').value = code; 
-            }
+            if(code) document.getElementById('peer-code-input').value = code; 
         };
     </script>
 </body>
