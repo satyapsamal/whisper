@@ -286,6 +286,13 @@
         document.addEventListener('contextmenu',event=>event.preventDefault());
         document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&(e.key==='s'||e.key==='S'))e.preventDefault();if((e.ctrlKey||e.metaKey)&&(e.key==='u'||e.key==='U'))e.preventDefault();if(e.key==='F12')e.preventDefault();if((e.ctrlKey||e.metaKey)&&e.shiftKey&&['i','I','j','J','c','C'].includes(e.key))e.preventDefault();if((e.ctrlKey||e.metaKey)&&(e.key==='p'||e.key==='P'))e.preventDefault()});
         window.onload=()=>{initPeer();const urlParams=new URLSearchParams(window.location.search);const code=urlParams.get('code');if(code)document.getElementById('peer-code-input').value=code}
-    </script>
+        if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('Service Worker registered', reg))
+      .catch(err => console.error('Service Worker failed', err));
+  });
+}  </script>
 </body>
 </html>
+
