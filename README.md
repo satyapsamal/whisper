@@ -123,4 +123,5 @@ Current development focuses on improving usability, addressing security concerns
 
 ## License
 
-This project is released under the MIT License.
+No license has been assigned to this project.
+All rights reserved by the author.
