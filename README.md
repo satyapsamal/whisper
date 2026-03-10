@@ -2,4 +2,6 @@
 
 Chat fearlessly with Whisper, a messaging platform with no central servers, no tracking, and no control by governments or big tech.
 
-![World’s most private messaging platform](worlds-most-private-messaging-platform.png)
+<p align="center">
+  <img src="worlds-most-private-messaging-platform.png" width="250">
+</p>
