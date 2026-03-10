@@ -87,7 +87,8 @@ This approach removes central points of surveillance and reduces infrastructure 
 
 ## Infrastructure
 
-Whisper operates using a decentralized communication model where users connect directly through peer-to-peer channels.  
+Whisper operates using a decentralized communication model where users connect directly through peer-to-peer channels. 
+
 No centralized infrastructure stores messages, manages identities, or tracks user activity.
 
 ### Infrastructure Diagram
