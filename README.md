@@ -85,6 +85,57 @@ This approach removes central points of surveillance and reduces infrastructure 
 
 ---
 
+## Infrastructure
+
+Whisper operates using a decentralized communication model where users connect directly through peer-to-peer channels.  
+No centralized infrastructure stores messages, manages identities, or tracks user activity.
+
+### Infrastructure Diagram
+
+```mermaid
+flowchart LR
+
+subgraph Client_Devices["Client Devices"]
+    A["User A Browser"]
+    B["User B Browser"]
+end
+
+subgraph WebRTC_Layer["Peer Communication Layer"]
+    C["WebRTC Peer Connection"]
+end
+
+subgraph Optional_Signaling["Connection Setup"]
+    D["Temporary Signaling"]
+end
+
+subgraph Local_System["Local Environment"]
+    E["Local Storage"]
+    F["Encryption Layer"]
+end
+
+A --> F
+B --> F
+
+A --> D
+B --> D
+
+A --> C
+B --> C
+
+C <-->|Encrypted Data Channel| A
+C <-->|Encrypted Data Channel| B
+
+F --> E
+
+note1["No Central Servers"]
+note2["No User Database"]
+note3["No Message Storage"]
+
+A --- note1
+B --- note2
+C --- note3
+```
+
 ## Privacy Model
 
 Whisper follows a **zero-data architecture**.
@@ -104,8 +155,8 @@ Conversations exist only between participants.
 
 ## Try Whisper
 
-Try Whisper here: https://satyapsamal.github.io/whisper/
-
+Try Whisper here:  
+https://satyapsamal.github.io/whisper/
 
 ---
 
@@ -129,5 +180,5 @@ Current development focuses on improving usability, addressing security concerns
 
 ## License
 
-No license has been assigned to this project.
+No license has been assigned to this project.  
 All rights reserved by the author.
