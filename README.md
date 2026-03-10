@@ -9,6 +9,12 @@ A private, peer-to-peer messaging platform with no central servers, no tracking,
 </p>
 
 <p align="center">
+  <a href="https://satyapsamal.github.io/whisper/">
+    <img src="https://img.shields.io/badge/Live%20Demo-Try%20Whisper-green?style=for-the-badge">
+  </a>
+</p>
+
+<p align="center">
   <img src="worlds-most-private-messaging-platform.png" width="500">
 </p>
 
