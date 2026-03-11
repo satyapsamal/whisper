@@ -358,7 +358,7 @@
             }
         }
         
-        function endCall(isRemote=false){if(callTimeoutTimer)clearTimeout(callTimeoutTimer);if(!isRemote&&conn&&conn.open)conn.send('WHISPER_CALL_TERMINATED');if(currentCall)currentCall.close();if(localStream){localStream.getTracks().forEach(t=>t.stop());localStream=null}if(callAnimFrame)cancelAnimationFrame(callAnimFrame);if(callAudioCtx){try{callAudioCtx.close()}catch(e){}}callOverlay.style.display='none';videoCallOverlay.style.display='none';remoteVideo.srcObject=null;localVideo.srcObject=null;isVideoCall=false;isAudioMuted=false;const muteBtns=document.querySelectorAll('.btn-mute-mic');muteBtns.forEach(btn=>{btn.style.background='#333';btn.innerHTML='<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>';});currentCall=null;const lastMsg=chatContainer.lastElementChild;if(lastMsg&&lastMsg.textContent!=="Private call has ended."&&lastMsg.textContent!=="Call unanswered")appendMessage("Private call ended",'system');stopFlasher();updateTitle()}
+        function endCall(isRemote=false){if(callTimeoutTimer)clearTimeout(callTimeoutTimer);if(!isRemote&&conn&&conn.open)conn.send('WHISPER_CALL_TERMINATED');if(currentCall)currentCall.close();if(localStream){localStream.getTracks().forEach(t=>t.stop());localStream=null}if(callAnimFrame)cancelAnimationFrame(callAnimFrame);if(callAudioCtx){try{callAudioCtx.close()}catch(e){}}callOverlay.style.display='none';videoCallOverlay.style.display='none';remoteVideo.srcObject=null;localVideo.srcObject=null;isVideoCall=false;isAudioMuted=false;const muteBtns=document.querySelectorAll('.btn-mute-mic');muteBtns.forEach(btn=>{btn.style.background='#333';btn.innerHTML='<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>';});currentCall=null;const lastMsg=chatContainer.lastElementChild;if(lastMsg&&lastMsg.textContent!=="Private call has ended."&&lastMsg.textContent!=="Call unanswered")appendMessage("The private call has ended.",'system');stopFlasher();updateTitle()}
         
         function showCallOverlay(status){callStatus.textContent=status;callOverlay.style.display='flex'}
         function renderCallControls(actions){callControls.innerHTML='';actions.forEach(act=>{const b=document.createElement('button');b.className=`call-action-btn ${act.class}`;b.innerHTML=act.label;if(act.bg)b.style.background=act.bg;b.onclick=act.action;callControls.appendChild(b)})}
@@ -463,6 +463,7 @@
     </script>
 </body>
 </html>
+
 
 
 
