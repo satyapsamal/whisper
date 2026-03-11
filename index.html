@@ -270,7 +270,7 @@
             <input type="file" id="file-input" style="display:none" accept="image/*,video/*">
         </div>
     </div>
-    <footer>Conversations stay private and are not tracked.</footer>
+    <footer>All conversations stay private and are not stored.</footer>
     <script>
         const chatContainer=document.getElementById('chat-container'),msgInput=document.getElementById('msg-input'),peerCodeInput=document.getElementById('peer-code-input'),fileInput=document.getElementById('file-input'),modal=document.getElementById('p2p-modal'),exitBtn=document.getElementById('exit-btn'),headerCallBtn=document.getElementById('header-call-btn'),headerVideoCallBtn=document.getElementById('header-video-call-btn'),confirmModal=document.getElementById('confirm-modal'),normalMode=document.getElementById('normal-input-mode'),voiceMode=document.getElementById('voice-input-mode'),visualizer=document.getElementById('visualizer'),timerDisplay=document.getElementById('rec-timer'),suggestionContainer=document.getElementById('suggestion-container'),callOverlay=document.getElementById('call-overlay'),videoCallOverlay=document.getElementById('video-call-overlay'),remoteVideo=document.getElementById('remote-video'),localVideo=document.getElementById('local-video'),callStatus=document.getElementById('call-status'),callControls=document.getElementById('call-controls'),troubleshootPanel=document.getElementById('troubleshoot-panel'),typingIndicator=document.getElementById('typing-indicator'),connectionStatus=document.getElementById('connection-status'),body=document.body,installBtn=document.getElementById('install-btn');
         let peer,conn,mediaRecorder,audioChunks=[],recordInterval,startTime,audioContext,analyser,dataArray,animationFrame,localUserSentMessage=false,currentCall=null,localStream=null,callAudioCtx,callAnalyser,callDataArray,callAnimFrame,pendingSeenReceipt=false,connectionAttempts=0,lastAttemptedCode="",typingTimeout,unseenCount=0,titleFlasher=null,deferredPrompt=null,offlineTimer=null,secondsLeft=180,isVideoCall=false,currentFacingMode='user',isAudioMuted=false,callTimeoutTimer=null;
@@ -463,4 +463,5 @@
     </script>
 </body>
 </html>
+
 
