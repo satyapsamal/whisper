@@ -27,14 +27,19 @@
         *::-webkit-scrollbar{display:none}
         body{background:var(--bg-color);color:var(--text-primary);height:100dvh;display:flex;flex-direction:column;overflow:hidden;transition:filter .5s ease}
         body.modal-active header,body.modal-active main,body.modal-active .input-wrapper,body.modal-active footer{filter:blur(12px);pointer-events:none}
-        header{padding:15px;display:grid;grid-template-columns:50px 1fr 50px;align-items:center;border-bottom:1px solid #222;background:rgba(0,0,0,.8);backdrop-filter:blur(10px);z-index:10;flex-shrink:0}
+        
+        /* Updated header layout to accommodate 2 buttons smoothly */
+        header{padding:15px;display:grid;grid-template-columns:90px 1fr 90px;align-items:center;border-bottom:1px solid #222;background:rgba(0,0,0,.8);backdrop-filter:blur(10px);z-index:10;flex-shrink:0}
         .header-title-container{grid-column:2;display:flex;flex-direction:column;align-items:center;justify-content:center}
         header h1{font-weight:600;letter-spacing:2px;font-size:1.1rem;text-transform:uppercase;text-align:center;line-height:1.2}
         .status-text{font-size:.65rem;font-weight:500;color:#666;letter-spacing:.5px;margin-top:2px;transition:color .3s ease}
         .status-text.online{color:var(--call-green)}
-        #exit-btn{background:transparent;border:none;color:var(--text-primary);font-size:1.5rem;cursor:pointer;display:none;justify-content:center;align-items:center;width:40px;height:40px;border-radius:50%}
+        #exit-btn{background:transparent;border:none;color:var(--text-primary);font-size:1.5rem;cursor:pointer;display:none;justify-content:flex-start;align-items:center;width:40px;height:40px;border-radius:50%}
+        
+        .header-actions{display:flex;justify-content:flex-end;gap:5px;}
         .call-btn{background:transparent;border:none;color:var(--accent-blue);cursor:pointer;display:none;justify-content:center;align-items:center;width:40px;height:40px}
         .call-btn svg{width:22px;height:22px;fill:currentColor}
+        
         #chat-container{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;position:relative}
         #suggestion-container{position:absolute;bottom:20px;left:0;right:0;display:none;justify-content:center;align-items:center;z-index:5;pointer-events:none}
         #hello-suggestion{background:#222;color:white;border:1px solid #444;padding:10px 24px;border-radius:25px;font-size:.85rem;font-weight:500;cursor:pointer;pointer-events:auto;animation:fadeIn .3s ease;box-shadow:0 4px 15px rgba(0,0,0,.3);transition:transform .2s}
@@ -73,6 +78,19 @@
         .call-action-btn{width:65px;height:65px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white}
         .btn-hangup{background:var(--record-red)}
         .btn-accept{background:var(--call-green)}
+
+        /* Video Call Dialog Styles */
+        #video-call-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); display:none; align-items:center; justify-content:center; z-index:400; backdrop-filter:blur(15px); }
+        .video-dialog { position:relative; width:100%; height:100%; display:flex; flex-direction:column; background:#000; overflow:hidden; }
+        @media (min-width: 768px) {
+            .video-dialog { width:800px; height:80vh; max-height:600px; border-radius:16px; border:1px solid #333; box-shadow:0 10px 40px rgba(0,0,0,0.5); }
+        }
+        #remote-video { width:100%; height:100%; object-fit:cover; background:#111; }
+        #local-video { position:absolute; top:20px; right:20px; width:100px; height:140px; object-fit:cover; border-radius:12px; border:2px solid rgba(255,255,255,0.2); background:#222; z-index:10; box-shadow:0 4px 12px rgba(0,0,0,0.4); }
+        #local-video.mirror { transform: scaleX(-1); }
+        .video-controls { position:absolute; bottom:30px; left:50%; transform:translateX(-50%); display:flex; gap:20px; z-index:10; background:rgba(0,0,0,0.6); padding:10px 20px; border-radius:40px; backdrop-filter:blur(10px); }
+        .video-controls .call-action-btn { width:55px; height:55px; }
+
         .spinner{display:none;width:24px;height:24px;border:3px solid #333;border-top:3px solid #fff;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}
         @keyframes spin{100%{transform:rotate(360deg)}}
         .voice-active-area{display:none;width:100%;align-items:center;padding:0 15px;gap:15px;animation:fadeIn .2s ease}
@@ -146,6 +164,25 @@
         <div class="call-status" id="call-status">Incoming Call...</div>
         <div class="call-controls" id="call-controls"></div>
     </div>
+    
+    <div id="video-call-overlay">
+        <div class="video-dialog">
+            <video id="remote-video" autoplay playsinline></video>
+            <video id="local-video" class="mirror" autoplay playsinline muted></video>
+            <div class="video-controls">
+                <button class="call-action-btn" id="btn-switch-cam" onclick="switchCamera()" style="background:#333;">
+                    <svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M20 4h-3.17L15 2H9L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 11.5V13H9v2.5L5.5 12 9 8.5V11h6V8.5l3.5 3.5-3.5 3.5z"/></svg>
+                </button>
+                <button class="call-action-btn" id="btn-mute-mic" onclick="toggleMute()" style="background:#333;">
+                    <svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                </button>
+                <button class="call-action-btn btn-hangup" onclick="endCall(false)">
+                    <svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="confirm-modal">
         <div class="confirm-content">
             <h3 style="margin-bottom:10px">End connection?</h3>
@@ -203,9 +240,14 @@
             <h1>Whisper</h1>
             <div id="connection-status" class="status-text">(Offline)</div>
         </div>
-        <button id="header-call-btn" class="call-btn" onclick="initiateVoiceCall()">
-            <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
-        </button>
+        <div class="header-actions">
+            <button id="header-video-call-btn" class="call-btn" onclick="initiateVideoCall()">
+                <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+            </button>
+            <button id="header-call-btn" class="call-btn" onclick="initiateVoiceCall()">
+                <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+            </button>
+        </div>
     </header>
     <main id="chat-container">
         <div id="typing-indicator" class="typing-bubble"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
@@ -231,8 +273,8 @@
     </div>
     <footer>Conversations stay private and are not tracked.</footer>
     <script>
-        const chatContainer=document.getElementById('chat-container'),msgInput=document.getElementById('msg-input'),peerCodeInput=document.getElementById('peer-code-input'),fileInput=document.getElementById('file-input'),modal=document.getElementById('p2p-modal'),exitBtn=document.getElementById('exit-btn'),headerCallBtn=document.getElementById('header-call-btn'),confirmModal=document.getElementById('confirm-modal'),normalMode=document.getElementById('normal-input-mode'),voiceMode=document.getElementById('voice-input-mode'),visualizer=document.getElementById('visualizer'),timerDisplay=document.getElementById('rec-timer'),suggestionContainer=document.getElementById('suggestion-container'),callOverlay=document.getElementById('call-overlay'),callStatus=document.getElementById('call-status'),callControls=document.getElementById('call-controls'),troubleshootPanel=document.getElementById('troubleshoot-panel'),typingIndicator=document.getElementById('typing-indicator'),connectionStatus=document.getElementById('connection-status'),body=document.body,installBtn=document.getElementById('install-btn');
-        let peer,conn,mediaRecorder,audioChunks=[],recordInterval,startTime,audioContext,analyser,dataArray,animationFrame,localUserSentMessage=false,currentCall=null,localStream=null,callAudioCtx,callAnalyser,callDataArray,callAnimFrame,pendingSeenReceipt=false,connectionAttempts=0,lastAttemptedCode="",typingTimeout,unseenCount=0,titleFlasher=null,deferredPrompt=null,offlineTimer=null,secondsLeft=180;
+        const chatContainer=document.getElementById('chat-container'),msgInput=document.getElementById('msg-input'),peerCodeInput=document.getElementById('peer-code-input'),fileInput=document.getElementById('file-input'),modal=document.getElementById('p2p-modal'),exitBtn=document.getElementById('exit-btn'),headerCallBtn=document.getElementById('header-call-btn'),headerVideoCallBtn=document.getElementById('header-video-call-btn'),confirmModal=document.getElementById('confirm-modal'),normalMode=document.getElementById('normal-input-mode'),voiceMode=document.getElementById('voice-input-mode'),visualizer=document.getElementById('visualizer'),timerDisplay=document.getElementById('rec-timer'),suggestionContainer=document.getElementById('suggestion-container'),callOverlay=document.getElementById('call-overlay'),videoCallOverlay=document.getElementById('video-call-overlay'),remoteVideo=document.getElementById('remote-video'),localVideo=document.getElementById('local-video'),callStatus=document.getElementById('call-status'),callControls=document.getElementById('call-controls'),troubleshootPanel=document.getElementById('troubleshoot-panel'),typingIndicator=document.getElementById('typing-indicator'),connectionStatus=document.getElementById('connection-status'),body=document.body,installBtn=document.getElementById('install-btn');
+        let peer,conn,mediaRecorder,audioChunks=[],recordInterval,startTime,audioContext,analyser,dataArray,animationFrame,localUserSentMessage=false,currentCall=null,localStream=null,callAudioCtx,callAnalyser,callDataArray,callAnimFrame,pendingSeenReceipt=false,connectionAttempts=0,lastAttemptedCode="",typingTimeout,unseenCount=0,titleFlasher=null,deferredPrompt=null,offlineTimer=null,secondsLeft=180,isVideoCall=false,currentFacingMode='user',isAudioMuted=false;
         peerCodeInput.addEventListener('input',function(e){let val=this.value;if(val.startsWith('WSP-WSP-'))val=val.substring(4);else if(val.includes('WSP-')&&val.indexOf('WSP-')>0)val='WSP-'+val.split('WSP-').join('');if(!val.startsWith('WSP-'))val='WSP-';this.value=val.toUpperCase()});
         peerCodeInput.addEventListener('keydown',function(e){if(this.selectionStart<4&&(e.key==='Backspace'||e.key==='Delete'))e.preventDefault()});
         window.addEventListener('beforeunload',()=>{if(conn&&conn.open)conn.send('WHISPER_EXIT')});
@@ -252,15 +294,29 @@
         function initPeer(){const shortId=Math.random().toString(36).substr(2,6).toUpperCase();peer=new Peer('WSP-'+shortId,{config:{'iceServers':[{url:'stun:stun.l.google.com:19302'},{url:'stun:stun1.l.google.com:19302'}]}});peer.on('open',(id)=>document.getElementById('my-code').textContent=id);peer.on('connection',(incomingConn)=>{conn=incomingConn;setupChatListeners()});peer.on('call',showIncomingCallUI);peer.on('error',(err)=>{console.error(err);resetConnectButton()})}
         function handleConnectClick(){const rawId=peerCodeInput.value.trim();if(!rawId||rawId.length<=4)return;const normalizedId=rawId.toUpperCase();if(normalizedId===lastAttemptedCode)connectionAttempts++;else{connectionAttempts=1;lastAttemptedCode=normalizedId}const btnText=document.getElementById('btn-text'),btnSpinner=document.getElementById('btn-spinner'),connectBtn=document.getElementById('connect-btn');btnText.style.display='none';btnSpinner.style.display='block';connectBtn.disabled=true;setTimeout(()=>connectToPeer(normalizedId),2000)}
         function resetConnectButton(){document.getElementById('btn-text').style.display='block';document.getElementById('btn-spinner').style.display='none';document.getElementById('connect-btn').disabled=false;if(connectionAttempts>=2)troubleshootPanel.style.display='block'}
-        function connectToPeer(peerId){conn=peer.connect(peerId,{reliable:true});const connectionTimeout=setTimeout(()=>{if(!conn.open)resetConnectButton()},6000);conn.on('open',()=>{clearTimeout(connectionTimeout);body.classList.remove('modal-active');modal.style.display='none';exitBtn.style.display='flex';headerCallBtn.style.display='flex';sendVisibilityStatus();updatePeerStatus(true);appendMessage("Private connection active. No government, big tech, or trackers involved.",'system');if(!localUserSentMessage)suggestionContainer.style.display='flex';conn.on('data',handleIncomingData);conn.on('close',()=>handleDisconnect())});conn.on('error',()=>{clearTimeout(connectionTimeout);resetConnectButton()})}
-        function setupChatListeners(){conn.on('open',()=>{body.classList.remove('modal-active');modal.style.display='none';exitBtn.style.display='flex';headerCallBtn.style.display='flex';sendVisibilityStatus();updatePeerStatus(true);appendMessage("Private connection active. No government, big tech, or trackers involved.",'system');if(!localUserSentMessage)suggestionContainer.style.display='flex';conn.on('data',handleIncomingData)});conn.on('close',()=>handleDisconnect())}
-        function handleDisconnect(){if(msgInput.disabled)return;const autoDelete=document.getElementById('pref-auto-delete').checked;if(autoDelete){const indicator=typingIndicator.cloneNode(true);const suggestions=suggestionContainer.cloneNode(true);chatContainer.innerHTML='';chatContainer.appendChild(indicator);chatContainer.appendChild(suggestions)}appendMessage("Private connection ended. This chat left no traces.",'system');msgInput.disabled=true;msgInput.placeholder="CONNECTION ENDED";document.getElementById('voice-trigger').style.display='none';document.getElementById('file-input').disabled=true;headerCallBtn.style.display='none';updatePeerStatus(false);stopFlasher();document.title="Whisper | Private Messaging"}
+        function connectToPeer(peerId){conn=peer.connect(peerId,{reliable:true});const connectionTimeout=setTimeout(()=>{if(!conn.open)resetConnectButton()},6000);conn.on('open',()=>{clearTimeout(connectionTimeout);body.classList.remove('modal-active');modal.style.display='none';exitBtn.style.display='flex';headerCallBtn.style.display='flex';headerVideoCallBtn.style.display='flex';sendVisibilityStatus();updatePeerStatus(true);appendMessage("Private connection active. No government, big tech, or trackers involved.",'system');if(!localUserSentMessage)suggestionContainer.style.display='flex';conn.on('data',handleIncomingData);conn.on('close',()=>handleDisconnect())});conn.on('error',()=>{clearTimeout(connectionTimeout);resetConnectButton()})}
+        function setupChatListeners(){conn.on('open',()=>{body.classList.remove('modal-active');modal.style.display='none';exitBtn.style.display='flex';headerCallBtn.style.display='flex';headerVideoCallBtn.style.display='flex';sendVisibilityStatus();updatePeerStatus(true);appendMessage("Private connection active. No government, big tech, or trackers involved.",'system');if(!localUserSentMessage)suggestionContainer.style.display='flex';conn.on('data',handleIncomingData)});conn.on('close',()=>handleDisconnect())}
+        function handleDisconnect(){if(msgInput.disabled)return;const autoDelete=document.getElementById('pref-auto-delete').checked;if(autoDelete){const indicator=typingIndicator.cloneNode(true);const suggestions=suggestionContainer.cloneNode(true);chatContainer.innerHTML='';chatContainer.appendChild(indicator);chatContainer.appendChild(suggestions)}appendMessage("Private connection ended. This chat left no traces.",'system');msgInput.disabled=true;msgInput.placeholder="CONNECTION ENDED";document.getElementById('voice-trigger').style.display='none';document.getElementById('file-input').disabled=true;headerCallBtn.style.display='none';headerVideoCallBtn.style.display='none';updatePeerStatus(false);stopFlasher();document.title="Whisper | Private Messaging"}
+        
         async function initiateVoiceCall(){if(!conn?.open)return;try{localStream=await navigator.mediaDevices.getUserMedia({audio:true});currentCall=peer.call(conn.peer,localStream);showCallOverlay("Calling...");renderCallControls([{label:'✕',class:'btn-hangup',action:()=>endCall(false)}]);setupRippleFeedback(localStream);currentCall.on('stream',(remoteStream)=>{setupRippleFeedback(remoteStream);callStatus.textContent="You’re on a private call";const audio=new Audio();audio.srcObject=remoteStream;audio.play();setCallTitle()});currentCall.on('close',()=>endCall(true))}catch(err){appendMessage("Could not access microphone.","system")}}
-        function showIncomingCallUI(incomingCall){currentCall=incomingCall;showCallOverlay("Someone’s calling you privately");startIncomingCallFlasher();renderCallControls([{label:'✕',class:'btn-hangup',action:()=>{currentCall.close();endCall(false)}}, {label:'✓',class:'btn-accept',action:acceptIncomingCall}])}
+        
+        async function initiateVideoCall(){if(!conn?.open)return;try{isVideoCall=true;currentFacingMode='user';localVideo.classList.add('mirror');localStream=await navigator.mediaDevices.getUserMedia({audio:true,video:{facingMode:currentFacingMode}});localVideo.srcObject=localStream;currentCall=peer.call(conn.peer,localStream,{metadata:{type:'video'}});videoCallOverlay.style.display='flex';setCallTitle();currentCall.on('stream',(remoteStream)=>{remoteVideo.srcObject=remoteStream;});currentCall.on('close',()=>endCall(true))}catch(err){appendMessage("Could not access camera/microphone.","system")}}
+        
+        function showIncomingCallUI(incomingCall){currentCall=incomingCall;const isVideo=incomingCall.metadata&&incomingCall.metadata.type==='video';isVideoCall=isVideo;showCallOverlay(isVideo?"Incoming Video Call...":"Someone’s calling you privately");startIncomingCallFlasher();const acceptAction=isVideo?acceptIncomingVideoCall:acceptIncomingCall;renderCallControls([{label:'✕',class:'btn-hangup',action:()=>{currentCall.close();endCall(false)}},{label:'✓',class:'btn-accept',action:acceptAction}])}
+        
         async function acceptIncomingCall(){try{localStream=await navigator.mediaDevices.getUserMedia({audio:true});currentCall.answer(localStream);callStatus.textContent="Connecting...";renderCallControls([{label:'✕',class:'btn-hangup',action:()=>endCall(false)}]);currentCall.on('stream',(remoteStream)=>{setupRippleFeedback(remoteStream);callStatus.textContent="You’re on a private call";const audio=new Audio();audio.srcObject=remoteStream;audio.play();setCallTitle()});currentCall.on('close',()=>endCall(true))}catch(err){endCall(false)}}
-        function setupRippleFeedback(stream){if(callAnimFrame)cancelAnimationFrame(callAnimFrame);if(callAudioCtx)callAudioCtx.close();callAudioCtx=new (window.AudioContext||window.webkitAudioContext)();const source=callAudioCtx.createMediaStreamSource(stream);callAnalyser=callAudioCtx.createAnalyser();callAnalyser.fftSize=64;source.connect(callAnalyser);callDataArray=new Uint8Array(callAnalyser.frequencyBinCount);animateRipples()}
+        
+        async function acceptIncomingVideoCall(){try{isVideoCall=true;currentFacingMode='user';localVideo.classList.add('mirror');localStream=await navigator.mediaDevices.getUserMedia({audio:true,video:{facingMode:currentFacingMode}});localVideo.srcObject=localStream;currentCall.answer(localStream);callOverlay.style.display='none';videoCallOverlay.style.display='flex';setCallTitle();currentCall.on('stream',(remoteStream)=>{remoteVideo.srcObject=remoteStream;});currentCall.on('close',()=>endCall(true))}catch(err){endCall(false)}}
+        
+        function setupRippleFeedback(stream){if(callAnimFrame)cancelAnimationFrame(callAnimFrame);if(callAudioCtx){try{callAudioCtx.close()}catch(e){}}callAudioCtx=new (window.AudioContext||window.webkitAudioContext)();const source=callAudioCtx.createMediaStreamSource(stream);callAnalyser=callAudioCtx.createAnalyser();callAnalyser.fftSize=64;source.connect(callAnalyser);callDataArray=new Uint8Array(callAnalyser.frequencyBinCount);animateRipples()}
         function animateRipples(){callAnimFrame=requestAnimationFrame(animateRipples);callAnalyser.getByteFrequencyData(callDataArray);let sum=0;for(let i=0;i<callDataArray.length;i++)sum+=callDataArray[i];const volume=sum/callDataArray.length;const scale=volume/128;const ripple1=document.getElementById('ripple-1'),ripple2=document.getElementById('ripple-2'),ripple3=document.getElementById('ripple-3');if(scale>0.05){ripple1.style.opacity=0.8;ripple1.style.transform=`scale(${1+scale*0.8})`;ripple2.style.opacity=0.5;ripple2.style.transform=`scale(${1+scale*1.5})`;ripple3.style.opacity=0.3;ripple3.style.transform=`scale(${1+scale*2.2})`}else{[ripple1,ripple2,ripple3].forEach(r=>{r.style.opacity=0;r.style.transform='scale(1)'})}}
-        function endCall(isRemote=false){if(!isRemote&&conn&&conn.open)conn.send('WHISPER_CALL_TERMINATED');if(currentCall)currentCall.close();if(localStream){localStream.getTracks().forEach(t=>t.stop());localStream=null}if(callAnimFrame)cancelAnimationFrame(callAnimFrame);if(callAudioCtx)callAudioCtx.close();callOverlay.style.display='none';currentCall=null;const lastMsg=chatContainer.lastElementChild;if(lastMsg&&lastMsg.textContent!=="Private call ended")appendMessage("Private call ended",'system');stopFlasher();updateTitle()}
+        
+        function toggleMute(){if(localStream){const audioTrack=localStream.getAudioTracks()[0];if(audioTrack){audioTrack.enabled=!audioTrack.enabled;isAudioMuted=!audioTrack.enabled;const muteBtn=document.getElementById('btn-mute-mic');if(isAudioMuted){muteBtn.style.background='var(--record-red)';muteBtn.innerHTML='<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M19 11h-1.7c0 .74-.16 1.43-.43 2.05l1.23 1.23c.56-.98.9-2.09.9-3.28zm-4.02.17c0-.06.02-.11.02-.17V5c0-1.66-1.34-3-3-3S9 3.34 9 5v.18l5.98 5.99zM4.27 3L3 4.27l6 6V11c0 1.66 1.33 3 2.99 3 .22 0 .44-.03.65-.08l1.66 1.66c-.71.33-1.5.52-2.31.52-2.76 0-5.3-2.1-5.3-5.1H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c.91-.13 1.77-.45 2.54-.9L19.73 21 21 19.73 4.27 3z"/></svg>';}else{muteBtn.style.background='#333';muteBtn.innerHTML='<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>';}}}}
+        
+        async function switchCamera(){if(!localStream)return;currentFacingMode=currentFacingMode==='user'?'environment':'user';if(currentFacingMode==='user'){localVideo.classList.add('mirror');}else{localVideo.classList.remove('mirror');}try{const newStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:currentFacingMode}});const newVideoTrack=newStream.getVideoTracks()[0];const oldVideoTrack=localStream.getVideoTracks()[0];if(currentCall&&currentCall.peerConnection){const sender=currentCall.peerConnection.getSenders().find(s=>s.track&&s.track.kind==='video');if(sender){sender.replaceTrack(newVideoTrack);}}localStream.removeTrack(oldVideoTrack);localStream.addTrack(newVideoTrack);oldVideoTrack.stop();}catch(err){console.error("Failed to switch camera",err);}}
+        
+        function endCall(isRemote=false){if(!isRemote&&conn&&conn.open)conn.send('WHISPER_CALL_TERMINATED');if(currentCall)currentCall.close();if(localStream){localStream.getTracks().forEach(t=>t.stop());localStream=null}if(callAnimFrame)cancelAnimationFrame(callAnimFrame);if(callAudioCtx){try{callAudioCtx.close()}catch(e){}}callOverlay.style.display='none';videoCallOverlay.style.display='none';remoteVideo.srcObject=null;localVideo.srcObject=null;isVideoCall=false;isAudioMuted=false;const muteBtn=document.getElementById('btn-mute-mic');if(muteBtn){muteBtn.style.background='#333';muteBtn.innerHTML='<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>';}currentCall=null;const lastMsg=chatContainer.lastElementChild;if(lastMsg&&lastMsg.textContent!=="Private call ended")appendMessage("Private call ended",'system');stopFlasher();updateTitle()}
+        
         function showCallOverlay(status){callStatus.textContent=status;callOverlay.style.display='flex'}
         function renderCallControls(actions){callControls.innerHTML='';actions.forEach(act=>{const b=document.createElement('button');b.className=`call-action-btn ${act.class}`;b.textContent=act.label;b.onclick=act.action;callControls.appendChild(b)})}
         function handleIncomingData(data){if(data==='WHISPER_EXIT'){handleDisconnect();return}if(data==='WHISPER_STATUS_ONLINE'){updatePeerStatus(true);return}if(data==='WHISPER_STATUS_OFFLINE'){updatePeerStatus(false);return}if(data==='WHISPER_CALL_TERMINATED'){endCall(true);return}if(data==='WHISPER_SEEN'){markLastSeen();return}if(data==='WHISPER_TYPING_ON'){showTypingIndicator(true);return}else if(data==='WHISPER_TYPING_OFF'){showTypingIndicator(false);return}showTypingIndicator(false);if(typeof data==='string'&&data.startsWith('WHISPER_AUD_')){appendAudioMessage(data.replace('WHISPER_AUD_',''),'received')}else if(typeof data==='string'&&data.startsWith('WHISPER_IMG_')){appendMediaMessage(data.replace('WHISPER_IMG_',''),'image','received')}else if(typeof data==='string'&&data.startsWith('WHISPER_VID_')){appendMediaMessage(data.replace('WHISPER_VID_',''),'video','received')}else{appendMessage(data,'received')}sendSeenIfVisible();if(document.visibilityState!=='visible'){unseenCount++;updateTitle()}}
@@ -294,7 +350,6 @@
                 alert("Whisper can only be installed using Chrome, Edge, or Safari. Please open this site in one of these browsers to install the app on your device.");
             }
         }
-        // Hide install button if already installed as PWA
         if(window.matchMedia('(display-mode: standalone)').matches){
             installBtn.style.display='none';
         }
