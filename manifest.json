@@ -6,10 +6,24 @@
   "background_color": "#000000",
   "theme_color": "#007aff",
   "icons": [
-    {"src": "favicon.webp", "sizes": "192x192", "type": "image/webp"},
-    {"src": "favicon.webp", "sizes": "512x512", "type": "image/webp"}
+    {
+      "src": "favicon.webp",
+      "sizes": "192x192",
+      "type": "image/webp"
+    },
+    {
+      "src": "favicon.webp",
+      "sizes": "512x512",
+      "type": "image/webp"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "worlds-most-private-messaging-platform.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Whisper secure private messaging interface"
+    }
   ]
 }
-
-
-
