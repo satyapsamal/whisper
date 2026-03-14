@@ -366,7 +366,7 @@
             }, 5000);
         });
 
-        /* SCREENSHOT DETECTION ADDITION (ROBUST) */
+        /* SCREENSHOT DETECTION ADDITION (EXPANDED) */
         function showScreenshotNotification() {
             const notif = document.getElementById('screenshot-notification');
             notif.classList.remove('hide');
@@ -378,65 +378,72 @@
             }, 5000);
         }
 
-        let metaDown = false;
-        let shiftDown = false;
+        let lastScreenshotTrigger = 0;
+        function triggerScreenshot() {
+            const now = Date.now();
+            if (now - lastScreenshotTrigger < 2000) return; // Debounce 2 seconds to prevent spam
+            lastScreenshotTrigger = now;
+            if (conn && conn.open) {
+                conn.send('WHISPER_SCREENSHOT');
+            }
+        }
 
         document.addEventListener('keydown', (e) => {
             const key = e.key ? e.key.toLowerCase() : '';
-            if (key === 'meta' || key === 'os') metaDown = true;
-            if (key === 'shift') shiftDown = true;
-
             let isScreenshot = false;
-            if (key === 'printscreen' || e.keyCode === 44) isScreenshot = true;
-            if (e.metaKey && e.shiftKey && ['s','3','4','5','6'].includes(key)) isScreenshot = true;
-            if (e.metaKey && key === 'g') isScreenshot = true;
-            if ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i','p','c'].includes(key)) isScreenshot = true;
-            if (e.metaKey && e.altKey && key === 'i') isScreenshot = true;
 
-            if (isScreenshot && conn && conn.open) conn.send('WHISPER_SCREENSHOT');
+            // 1. PrintScreen key (handles PrtScn, Alt+PrtScn, Shift+PrtScn, Ctrl+PrtScn, Win+PrtScn, Meta+PrtScn, etc.)
+            if (key === 'printscreen' || e.keyCode === 44) isScreenshot = true;
+
+            // 2. Windows Snipping / Game Bar shortcuts
+            if (e.metaKey && e.shiftKey && key === 's') isScreenshot = true; // Win + Shift + S
+            if (e.metaKey && key === 'g') isScreenshot = true; // Win + G
+
+            // 3. MacOS Screenshot shortcuts (Cmd + Shift + 3, 4, 5, 6) including Control modifiers
+            if (e.metaKey && e.shiftKey && ['3','4','5','6'].includes(key)) isScreenshot = true; 
+
+            // 4. Browser/DevTools Shortcuts (Ctrl/Cmd + Shift + S/I/P/C/J/X and Ctrl/Cmd + P/C)
+            const isCmdOrCtrl = e.metaKey || e.ctrlKey;
+            if (isCmdOrCtrl && e.shiftKey && ['s','i','p','c','j','x'].includes(key)) isScreenshot = true;
+            if (isCmdOrCtrl && ['p', 'c'].includes(key)) isScreenshot = true; // Includes Ctrl+C / Cmd+C
+
+            if (isScreenshot) {
+                triggerScreenshot();
+            }
         });
 
         document.addEventListener('keyup', (e) => {
             const key = e.key ? e.key.toLowerCase() : '';
-            if (key === 'meta' || key === 'os') metaDown = false;
-            if (key === 'shift') shiftDown = false;
-            
-            // PrintScreen often only fires on keyup in Windows
+            // PrintScreen often only fires on keyup in Windows depending on the exact combination
             if (key === 'printscreen' || e.keyCode === 44) {
-                if (conn && conn.open) conn.send('WHISPER_SCREENSHOT');
+                triggerScreenshot();
             }
         });
 
-        window.addEventListener('blur', () => {
-            // If window loses focus while Meta+Shift is held (Snipping tool / Mac screenshot)
-            if (metaDown && shiftDown) {
-                if (conn && conn.open) conn.send('WHISPER_SCREENSHOT');
-            }
-            metaDown = false; shiftDown = false;
-        });
+        // 5. Mobile Gestures (3-finger swipe down)
+        let touchStartY = 0;
+        let isThreeFinger = false;
 
-        let ts_y = 0;
-        let threeFingerSwipe = false;
-        
         document.addEventListener('touchstart', (e) => {
             if (e.touches.length >= 3) {
-                threeFingerSwipe = true;
-                ts_y = e.touches[0].clientY;
+                isThreeFinger = true;
+                touchStartY = e.touches[0].clientY;
+                triggerScreenshot(); // Immediate trigger for aggressive OS gestures
             }
         }, {passive: true});
-        
+
         document.addEventListener('touchmove', (e) => {
-            if (threeFingerSwipe && e.touches.length >= 3) {
+            if (isThreeFinger && e.touches.length >= 3) {
                 let currentY = e.touches[0].clientY;
-                if (currentY - ts_y > 40 && conn && conn.open) {
-                    conn.send('WHISPER_SCREENSHOT');
-                    threeFingerSwipe = false; 
+                if (currentY - touchStartY > 50) { 
+                    triggerScreenshot();
+                    isThreeFinger = false; // reset
                 }
             }
         }, {passive: true});
-        
+
         document.addEventListener('touchend', (e) => {
-            if (e.touches.length < 3) threeFingerSwipe = false;
+            if (e.touches.length < 3) isThreeFinger = false;
         });
 
         peerCodeInput.addEventListener('input',function(e){let val=this.value;if(val.startsWith('WSP-WSP-'))val=val.substring(4);else if(val.includes('WSP-')&&val.indexOf('WSP-')>0)val='WSP-'+val.split('WSP-').join('');if(!val.startsWith('WSP-'))val='WSP-';this.value=val.toUpperCase()});
@@ -557,7 +564,7 @@
             if(data==='WHISPER_SEEN'){markLastSeen();return}
             if(data==='WHISPER_TYPING_ON'){showTypingIndicator(true);return}
             if(data==='WHISPER_TYPING_OFF'){showTypingIndicator(false);return}
-            /* SCREENSHOT DETECTION ADDITION (ROBUST) */
+            /* SCREENSHOT DETECTION ADDITION (EXPANDED) */
             if(data==='WHISPER_SCREENSHOT'){showScreenshotNotification();return}
             showTypingIndicator(false);
 
