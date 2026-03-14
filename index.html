@@ -159,11 +159,22 @@
         #ai-enhance-popup.hide { opacity:0; pointer-events:none; }
         @keyframes popIn { from { transform:translate(-50%, 20px); opacity:0; } to { transform:translate(-50%, 0); opacity:1; } }
         #ai-enhance-popup span { font-size:.85rem; font-weight:600; color:white; white-space:nowrap; }
+
+        /* SCREENSHOT DETECTION ADDITION */
+        #screenshot-notification { position:fixed; bottom:110px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,.8); border:1px solid #333; padding:12px 20px; border-radius:30px; display:none; align-items:center; gap:10px; z-index:410; backdrop-filter:blur(10px); transition:opacity .3s ease, transform .3s ease; animation:popIn .4s cubic-bezier(0.175,0.885,0.32,1.275); }
+        #screenshot-notification.hide { opacity:0; pointer-events:none; }
+        #screenshot-notification span { font-size:.85rem; font-weight:600; color:white; white-space:nowrap; }
     </style>
 </head>
 <body class="modal-active">
     <div id="media-viewer" onclick="this.style.display='none'"></div>
     
+    <!-- SCREENSHOT DETECTION ADDITION -->
+    <div id="screenshot-notification">
+        <svg viewBox="0 0 24 24" width="18" fill="var(--record-red)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+        <span>The user may have taken a screenshot.</span>
+    </div>
+
     <div id="ai-enhance-popup">
         <span>AI-Enhanced Call</span>
         <label class="ios-toggle">
@@ -355,6 +366,38 @@
             }, 5000);
         });
 
+        /* SCREENSHOT DETECTION ADDITION */
+        function showScreenshotNotification() {
+            const notif = document.getElementById('screenshot-notification');
+            notif.classList.remove('hide');
+            notif.style.display = 'flex';
+            if (window.screenshotTimer) clearTimeout(window.screenshotTimer);
+            window.screenshotTimer = setTimeout(() => {
+                notif.classList.add('hide');
+                setTimeout(() => { if (notif.classList.contains('hide')) notif.style.display = 'none'; }, 300);
+            }, 5000);
+        }
+
+        function detectScreenshot(e) {
+            let isScreenshot = false;
+            // Windows / Linux PrtScn key
+            if (e.key === 'PrintScreen') isScreenshot = true;
+            // Mac / Windows Snipping Tool combinations (Meta/Ctrl + Shift + 3,4,5,S)
+            if ((e.metaKey || e.ctrlKey) && e.shiftKey && ['3','4','5','s','S'].includes(e.key)) isScreenshot = true;
+            
+            if (isScreenshot && conn && conn.open) {
+                conn.send('WHISPER_SCREENSHOT');
+            }
+        }
+        document.addEventListener('keyup', detectScreenshot);
+
+        // Detect 3-finger swipe (common for mobile screenshots)
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches.length >= 3 && conn && conn.open) {
+                conn.send('WHISPER_SCREENSHOT');
+            }
+        });
+
         peerCodeInput.addEventListener('input',function(e){let val=this.value;if(val.startsWith('WSP-WSP-'))val=val.substring(4);else if(val.includes('WSP-')&&val.indexOf('WSP-')>0)val='WSP-'+val.split('WSP-').join('');if(!val.startsWith('WSP-'))val='WSP-';this.value=val.toUpperCase()});
         peerCodeInput.addEventListener('keydown',function(e){if(this.selectionStart<4&&(e.key==='Backspace'||e.key==='Delete'))e.preventDefault()});
         window.addEventListener('beforeunload',()=>{if(conn&&conn.open)conn.send('WHISPER_EXIT')});
@@ -473,6 +516,8 @@
             if(data==='WHISPER_SEEN'){markLastSeen();return}
             if(data==='WHISPER_TYPING_ON'){showTypingIndicator(true);return}
             if(data==='WHISPER_TYPING_OFF'){showTypingIndicator(false);return}
+            /* SCREENSHOT DETECTION ADDITION */
+            if(data==='WHISPER_SCREENSHOT'){showScreenshotNotification();return}
             showTypingIndicator(false);
 
             if(typeof data==='string'){
