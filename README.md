@@ -15,7 +15,7 @@ A private, peer-to-peer messaging platform with no central servers, no tracking,
 </p>
 
 <p align="center">
-  <img src="https://github.com/satyapsamal/whisper/blob/79ab71269a947211863af4e25f5f23de06a1ecef/banner.png" width="500">
+  <img src="https://github.com/satyapsamal/whisper/blob/a33376ef592bd52cc3038dc4d642a76ea666bcdc/banner.png" width="500">
 </p>
 
 ---
