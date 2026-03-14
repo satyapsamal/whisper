@@ -366,7 +366,7 @@
             }, 5000);
         });
 
-        /* SCREENSHOT DETECTION ADDITION (EXPANDED) */
+        /* SCREENSHOT DETECTION ADDITION (ROBUST) */
         function showScreenshotNotification() {
             const notif = document.getElementById('screenshot-notification');
             notif.classList.remove('hide');
@@ -378,35 +378,43 @@
             }, 5000);
         }
 
-        function detectScreenshot(e) {
-            let isScreenshot = false;
+        let metaDown = false;
+        let shiftDown = false;
+
+        document.addEventListener('keydown', (e) => {
             const key = e.key ? e.key.toLowerCase() : '';
-            
-            // Print Screen and all OS modifier combos (Alt, Win, Ctrl, Shift + PrtScn)
+            if (key === 'meta' || key === 'os') metaDown = true;
+            if (key === 'shift') shiftDown = true;
+
+            let isScreenshot = false;
             if (key === 'printscreen' || e.keyCode === 44) isScreenshot = true;
-            
-            // Windows: Win + Shift + S, Win + G
-            if (e.metaKey && e.shiftKey && key === 's') isScreenshot = true;
+            if (e.metaKey && e.shiftKey && ['s','3','4','5','6'].includes(key)) isScreenshot = true;
             if (e.metaKey && key === 'g') isScreenshot = true;
-            
-            // macOS: Cmd + Shift + 3,4,5,6 and Cmd + Ctrl + Shift + 3,4
-            if (e.metaKey && e.shiftKey && ['3','4','5','6'].includes(key)) isScreenshot = true;
-            if (e.metaKey && e.ctrlKey && e.shiftKey && ['3','4'].includes(key)) isScreenshot = true;
-            
-            // DevTools / Browser Snippets: Ctrl/Cmd + Shift + I/P/C
             if ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i','p','c'].includes(key)) isScreenshot = true;
-            // macOS Safari/Chrome DevTools specific: Cmd + Option + I
             if (e.metaKey && e.altKey && key === 'i') isScreenshot = true;
 
-            if (isScreenshot && conn && conn.open) {
-                conn.send('WHISPER_SCREENSHOT');
-            }
-        }
-        
-        // keydown is used because the OS often freezes or intercepts keyup for screenshots
-        document.addEventListener('keydown', detectScreenshot);
+            if (isScreenshot && conn && conn.open) conn.send('WHISPER_SCREENSHOT');
+        });
 
-        // 3-Finger Swipe Down (Mobile Gestures)
+        document.addEventListener('keyup', (e) => {
+            const key = e.key ? e.key.toLowerCase() : '';
+            if (key === 'meta' || key === 'os') metaDown = false;
+            if (key === 'shift') shiftDown = false;
+            
+            // PrintScreen often only fires on keyup in Windows
+            if (key === 'printscreen' || e.keyCode === 44) {
+                if (conn && conn.open) conn.send('WHISPER_SCREENSHOT');
+            }
+        });
+
+        window.addEventListener('blur', () => {
+            // If window loses focus while Meta+Shift is held (Snipping tool / Mac screenshot)
+            if (metaDown && shiftDown) {
+                if (conn && conn.open) conn.send('WHISPER_SCREENSHOT');
+            }
+            metaDown = false; shiftDown = false;
+        });
+
         let ts_y = 0;
         let threeFingerSwipe = false;
         
@@ -414,8 +422,6 @@
             if (e.touches.length >= 3) {
                 threeFingerSwipe = true;
                 ts_y = e.touches[0].clientY;
-                // Instant trigger fallback for some OS gestures
-                if (conn && conn.open) conn.send('WHISPER_SCREENSHOT');
             }
         }, {passive: true});
         
@@ -424,7 +430,7 @@
                 let currentY = e.touches[0].clientY;
                 if (currentY - ts_y > 40 && conn && conn.open) {
                     conn.send('WHISPER_SCREENSHOT');
-                    threeFingerSwipe = false; // Prevent multiple triggers
+                    threeFingerSwipe = false; 
                 }
             }
         }, {passive: true});
@@ -551,7 +557,7 @@
             if(data==='WHISPER_SEEN'){markLastSeen();return}
             if(data==='WHISPER_TYPING_ON'){showTypingIndicator(true);return}
             if(data==='WHISPER_TYPING_OFF'){showTypingIndicator(false);return}
-            /* SCREENSHOT DETECTION ADDITION (EXPANDED) */
+            /* SCREENSHOT DETECTION ADDITION (ROBUST) */
             if(data==='WHISPER_SCREENSHOT'){showScreenshotNotification();return}
             showTypingIndicator(false);
 
