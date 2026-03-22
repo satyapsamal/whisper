@@ -137,23 +137,42 @@
         #media-viewer{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.95);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(10px)}
         #media-viewer img,#media-viewer video{max-width:95%;max-height:90%;border-radius:10px}
         .modal-content{position:relative}
-        #help-trigger, #privacy-trigger, #agreement-trigger {font-size:.8rem;color:#666;cursor:pointer;text-decoration:none;transition:all .2s ease;text-align:center;display:block;}
-        #help-trigger {margin-top:20px;}
-        .footer-links-container{display:flex;flex-direction:row;justify-content:center;align-items:center;margin-top:12px;gap:10px}
+        
+        #help-trigger, #transparency-trigger {font-size:.8rem;color:#666;cursor:pointer;text-decoration:none;transition:all .2s ease;text-align:center;display:block;}
+        .footer-links-container{display:flex;flex-direction:row;justify-content:center;align-items:center;margin-top:20px;gap:10px}
         .link-separator{display:block;color:#555;font-size:.8rem}
-        #help-trigger:hover, #help-trigger:active, #privacy-trigger:hover, #privacy-trigger:active, #agreement-trigger:hover, #agreement-trigger:active{text-decoration:underline;color:var(--accent-blue)}
-        #instruction-view, #privacy-view, #agreement-view{display:none;position:absolute;top:0;left:0;width:100%;height:100%;background:var(--modal-bg);z-index:20;border-radius:35px;padding:0;flex-direction:column;text-align:left;overflow:hidden}
+        #help-trigger:hover, #help-trigger:active, #transparency-trigger:hover, #transparency-trigger:active{text-decoration:underline;color:var(--accent-blue)}
+        
+        .inline-link {
+            text-decoration: underline;
+            cursor: pointer;
+            color: inherit;
+        }
+
+        #instruction-view, #transparency-view, #privacy-view, #agreement-view{display:none;position:absolute;top:0;left:0;width:100%;height:100%;background:var(--modal-bg);z-index:20;border-radius:35px;padding:0;flex-direction:column;text-align:left;overflow:hidden}
         .instruction-header{padding:30px 30px 10px 30px;background:var(--modal-bg);flex-shrink:0;box-shadow:0 4px 20px rgba(0,0,0,.5);z-index:25;position:relative}
         .instruction-scroll-content{flex:1;overflow-y:auto;padding:20px 30px 10px 30px}
         .instruction-footer{padding:10px 30px 30px 30px;background:var(--modal-bg);flex-shrink:0;width:100%;box-shadow:0 -4px 20px rgba(0,0,0,.5);z-index:25;position:relative}
         #instruction-view h2{font-size:1.2rem;text-align:center;color:white;margin:0}
-        #privacy-view h2, #agreement-view h2{font-size:1.5rem;text-align:center;color:white;margin:0}
+        #transparency-view h2, #privacy-view h2, #agreement-view h2{font-size:1.5rem;text-align:center;color:white;margin:0}
         .help-section{margin-bottom:25px}
         .help-section h3{font-size:.95rem;color:var(--accent-blue);margin-bottom:10px;font-weight:600}
         .help-section ul{list-style:none;padding-left:5px}
         .help-section li{font-size:.8rem;color:#ccc;margin-bottom:8px;line-height:1.5;position:relative;padding-left:15px}
         .help-section li::before{content:"•";color:#555;position:absolute;left:0}
         .help-section li strong{color:#fff;font-weight:600}
+        
+        .transparency-text {
+            font-size:0.8rem; 
+            color:#ccc; 
+            line-height:1.6; 
+            text-align:justify; 
+            margin-bottom: 15px;
+        }
+        .transparency-text:last-child {
+            margin-bottom: 0;
+        }
+
         .install-btn{background:var(--modal-bg);border:1px solid #333;padding:20px 30px;border-radius:35px;width:90%;max-width:400px;display:flex;align-items:center;justify-content:center;text-decoration:none;color:white;margin-top:0;transition:transform .2s,background .2s;cursor:pointer;box-shadow:0 4px 15px rgba(0,0,0,.3);animation:modalPop .4s cubic-bezier(0.175,0.885,0.32,1.275);animation-fill-mode:backwards;animation-delay:.1s}
         .install-btn:active{transform:scale(.98);background:#111}
         .install-text{font-weight:600;font-size:1rem}
@@ -250,11 +269,10 @@
                 <div class="pref-item"><span class="pref-label">Auto-delete on leave</span><label class="ios-toggle"><input type="checkbox" id="pref-auto-delete" checked><span class="slider"></span></label></div>
             </div>
             
-            <div id="help-trigger" onclick="toggleHelp(true)">Getting Started with Whisper?</div>
             <div class="footer-links-container">
-                <div id="agreement-trigger" onclick="toggleAgreement(true)">User Agreement</div>
+                <div id="help-trigger" onclick="toggleHelp(true)">Getting Started with Whisper?</div>
                 <span class="link-separator">|</span>
-                <div id="privacy-trigger" onclick="togglePrivacy(true)">Privacy Policy</div>
+                <div id="transparency-trigger" onclick="toggleTransparency(true)">Transparency</div>
             </div>
             
             <div id="instruction-view">
@@ -267,15 +285,31 @@
                 <div class="instruction-footer"><button class="btn" style="background:#222;color:white;min-height:44px" onclick="toggleHelp(false)">Back</button></div>
             </div>
 
+            <div id="transparency-view">
+                <div class="instruction-header">
+                    <h2>Transparency</h2>
+                    <div style="text-align:center; font-size:0.85rem; color:var(--accent-blue); margin-top:5px; font-weight:600;">Built to be open with you, no secrets</div>
+                </div>
+                <div class="instruction-scroll-content">
+                    <p class="transparency-text">At Whisper, privacy is not treated as a feature or a setting you have to turn on. It is where everything begins. The idea is simple: when you have a conversation, it should stay between the people involved. Nothing extra. Nothing hidden behind the scenes.</p>
+                    <p class="transparency-text">Today, many platforms are built around collecting, analyzing, and learning from user activity. Conversations can become data points, and personal interactions can quietly turn into something that is observed or measured. Over time, this has made private communication feel less private.</p>
+                    <p class="transparency-text">Whisper takes a different direction. It is designed to keep communication limited to the intended participants, without building systems around observing or profiling what you say. There are no accounts to manage and no long-term records of your chats within the platform. The focus stays on the conversation itself, not on anything around it.</p>
+                    <p class="transparency-text">This approach is about respect. Respect for your space, your words, and your control over who gets to see them. You should not have to think about who else might be watching or how your messages could be used beyond their purpose.</p>
+                    <p class="transparency-text">Transparency means you are not left guessing. What the platform does is clear, and just as importantly, what it does not do is also clear. If you want to explore the details, you can read our <span class="inline-link" onclick="toggleTransparency(false); togglePrivacy(true);">Privacy Policy</span> and <span class="inline-link" onclick="toggleTransparency(false); toggleAgreement(true);">User Agreement</span>, where everything is explained in full.</p>
+                </div>
+                <div class="instruction-footer"><button class="btn" style="background:#222;color:white;min-height:44px" onclick="toggleTransparency(false)">Back</button></div>
+            </div>
+
             <div id="privacy-view">
                 <div class="instruction-header">
                     <h2>Privacy Policy</h2>
-                    <div style="text-align:center; font-size:0.85rem; color:var(--accent-blue); margin-top:5px; font-weight:600;">No one else can read your messages.</div>
+                    <div style="text-align:center; font-size:0.85rem; color:var(--accent-blue); margin-top:5px; font-weight:600;">No one else can read your messages</div>
                     <div style="text-align:center; font-size:0.75rem; color:#777; margin-top:2px;">Last updated: March 2026</div>
                 </div>
                 <div class="instruction-scroll-content">
                     <p style="font-size:0.8rem; color:#ccc; line-height:1.6; text-align:justify;">
-                        Whisper | Private Messaging (the “Service”) is architected as a stateless, client-executed, browser-resident communication interface that does not intentionally collect, store, persist, profile, or commercially exploit personally identifiable information, communication payloads, or user-derived data, and is designed such that any transient technical data inherently required for establishing and maintaining direct communication pathways is processed ephemerally within user-controlled execution environments and underlying communication layers without retention, indexing, or accessibility beyond real-time operational necessity; the Service does not maintain persistent records, user identities, or retrievable logs, and does not facilitate post-session reconstruction, inspection, or disclosure of communications, thereby eliminating any practical capability for retrospective access or monitoring; the User expressly acknowledges and accepts that any exposure, correlation, interception, or compromise of information may arise from factors external to the Service’s intended operational scope, including but not limited to endpoint integrity, execution environment conditions, intermediary network behaviors, or user handling practices, and assumes sole and exclusive responsibility for managing such risks; the Service is provided strictly on an “as-is,” “as-available,” and “without warranties of any kind” basis, and explicitly disclaims all representations or assurances, whether express, implied, or statutory, including but not limited to guarantees of privacy, security, availability, or fitness for any particular purpose; to the maximum extent permissible under applicable law, the developer, operator, and any affiliated entities disclaim all liability and responsibility, whether in contract, tort, or otherwise, for any direct, indirect, incidental, consequential, or derivative damages arising from or related to the use, misuse, or inability to use the Service, including but not limited to unauthorized access, data exposure, reliance on perceived characteristics, or failures occurring outside the intended functional scope of the Service, and the User irrevocably waives any claims in connection with such matters; the Service may be modified, restricted, or discontinued at any time without prior notice, and continued use constitutes acceptance of the prevailing policy terms, subject only to limitations that cannot be excluded under applicable law.
+                        Whisper | Private Messaging (“Whisper”, “the Service”) is a stateless, client-executed, browser-resident communication substrate operating over decentralized peer-to-peer (“P2P”) transport primitives implemented through WebRTC. The Service is distributed as static assets and does not maintain any server-side application layer, persistent datastore, account registry, or identity resolution framework under the control of the developer. The Service does not solicit, ingest, persist, or centrally process personally identifiable information, nor does it implement authentication, credentialing, or durable user-account constructs. All interaction occurs within an ephemeral, session-scoped execution context without persistent identity correlation. User-originated payloads, including textual, audiovisual, and file-based transmissions, are instantiated and processed exclusively within the client runtime environment and are conveyed directly between peer endpoints via WebRTC transport channels. Such payloads are not retained within developer-controlled infrastructure and remain transient within volatile browser memory for the duration of an active session. Session establishment is mediated through ICE negotiation, and network traversal may require the exchange of connection descriptors and related network-layer identifiers necessary for peer bootstrap. Data-in-transit is protected by browser-enforced cryptographic transport primitives, including DTLS and SRTP. The Service neither accesses nor retains communication content and is not positioned within the payload transmission path. The Service does not deploy cookies, behavioral telemetry, profiling instrumentation, or analytics mechanisms. Limited client-side storage may be utilized solely for non-sensitive functional state and does not constitute personal data processing. The Service may depend on third-party infrastructure for delivery or session coordination, and such infrastructure may independently process technical request metadata in accordance with its own policies. The Service is not intended for individuals under the age of 13. This Privacy Policy may be revised to reflect architectural or legal changes. Continued use of the Service constitutes acceptance of the updated version.
+                    </p>
                 </div>
                 <div class="instruction-footer"><button class="btn" style="background:#222;color:white;min-height:44px" onclick="togglePrivacy(false)">Back</button></div>
             </div>
@@ -670,6 +704,12 @@
             const helpView=document.getElementById('instruction-view');
             const mc=document.querySelector('.modal-content');
             helpView.style.display=show?'flex':'none';
+            if(show){mc.scrollTop=0;mc.style.overflowY='hidden'}else{mc.style.overflowY='auto'}
+        }
+        function toggleTransparency(show){
+            const transparencyView=document.getElementById('transparency-view');
+            const mc=document.querySelector('.modal-content');
+            transparencyView.style.display=show?'flex':'none';
             if(show){mc.scrollTop=0;mc.style.overflowY='hidden'}else{mc.style.overflowY='auto'}
         }
         function togglePrivacy(show){
