@@ -269,7 +269,7 @@
             <div id="privacy-view">
                 <div class="instruction-header">
                     <h2>Privacy Policy</h2>
-                    <div style="text-align:center; font-size:0.85rem; color:var(--accent-blue); margin-top:5px; font-weight:600;">We don't track you.</div>
+                    <div style="text-align:center; font-size:0.85rem; color:var(--accent-blue); margin-top:5px; font-weight:600;">No one else can read your messages.</div>
                     <div style="text-align:center; font-size:0.75rem; color:#777; margin-top:2px;">Last updated: March 2026</div>
                 </div>
                 <div class="instruction-scroll-content">
@@ -469,7 +469,7 @@
         function startIncomingCallFlasher(){if(titleFlasher)clearInterval(titleFlasher);let toggle=true;titleFlasher=setInterval(()=>{document.title=toggle?"Incoming Call | Whisper":"Whisper | Private Messaging";toggle=!toggle},1000)}
         function stopFlasher(){if(titleFlasher){clearInterval(titleFlasher);titleFlasher=null}}
         function setCallTitle(){stopFlasher();document.title="Call in Progress | Whisper"}
-        function startOfflineCountdown(){if(offlineTimer)clearInterval(offlineTimer);secondsLeft=180;connectionStatus.textContent=`(Offline | Chat closes in ${secondsLeft}s)`;offlineTimer=setInterval(()=>{secondsLeft--;connectionStatus.textContent=`(Offline | Chat closes in ${secondsLeft}s)`;if(secondsLeft<=0){clearInterval(offlineTimer);appendMessage("Chat closed. Link expired.",'system');handleDisconnect()}},1000)}
+        function startOfflineCountdown(){if(offlineTimer)clearInterval(offlineTimer);secondsLeft=180;connectionStatus.textContent=`(Offline | Chat closes in ${secondsLeft}s)`;offlineTimer=setInterval(()=>{secondsLeft--;connectionStatus.textContent=`(Offline | Chat closes in ${secondsLeft}s)`;if(secondsLeft<=0){clearInterval(offlineTimer);appendMessage("Private chat has ended. Link is no longer active.",'system');handleDisconnect()}},1000)}
         function updatePeerStatus(isOnline){if(isOnline){connectionStatus.textContent="(Online)";connectionStatus.classList.add('online');if(offlineTimer){clearInterval(offlineTimer);offlineTimer=null}}else{connectionStatus.classList.remove('online');startOfflineCountdown()}}
         for(let i=0;i<25;i++){const bar=document.createElement('div');bar.className='v-bar';visualizer.appendChild(bar)}
         function getCurrentTime(){const now=new Date();return now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
