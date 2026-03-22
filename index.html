@@ -90,7 +90,6 @@
         #local-video { position:absolute; top:20px; right:20px; width:100px; height:140px; object-fit:cover; border-radius:12px; border:2px solid rgba(255,255,255,0.2); background:#222; z-index:10; box-shadow:0 4px 12px rgba(0,0,0,0.4); }
         #local-video.mirror { transform: scaleX(-1); }
 
-        /* VIDEO ENHANCEMENT ADDITION */
         #remote-video, #local-video {
             filter: brightness(1.05) contrast(1.05) saturate(1.1);
         }
@@ -138,13 +137,17 @@
         #media-viewer{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.95);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(10px)}
         #media-viewer img,#media-viewer video{max-width:95%;max-height:90%;border-radius:10px}
         .modal-content{position:relative}
-        #help-trigger{margin-top:20px;font-size:.8rem;color:#666;cursor:pointer;text-decoration:none;transition:all .2s ease}
-        #help-trigger:hover,#help-trigger:active{text-decoration:underline;color:var(--accent-blue)}
-        #instruction-view{display:none;position:absolute;top:0;left:0;width:100%;height:100%;background:var(--modal-bg);z-index:20;border-radius:35px;padding:0;flex-direction:column;text-align:left;overflow:hidden}
+        #help-trigger, #privacy-trigger{font-size:.8rem;color:#666;cursor:pointer;text-decoration:none;transition:all .2s ease}
+        .footer-links-container{display:flex;flex-direction:column;align-items:center;margin-top:20px;gap:10px}
+        .link-separator{display:none;color:#555;font-size:.8rem}
+        @media (min-width: 768px){.footer-links-container{flex-direction:row;justify-content:center;gap:10px}.link-separator{display:block}}
+        #help-trigger:hover, #help-trigger:active, #privacy-trigger:hover, #privacy-trigger:active{text-decoration:underline;color:var(--accent-blue)}
+        #instruction-view, #privacy-view{display:none;position:absolute;top:0;left:0;width:100%;height:100%;background:var(--modal-bg);z-index:20;border-radius:35px;padding:0;flex-direction:column;text-align:left;overflow:hidden}
         .instruction-header{padding:30px 30px 10px 30px;background:var(--modal-bg);flex-shrink:0;box-shadow:0 4px 20px rgba(0,0,0,.5);z-index:25;position:relative}
         .instruction-scroll-content{flex:1;overflow-y:auto;padding:20px 30px 10px 30px}
         .instruction-footer{padding:10px 30px 30px 30px;background:var(--modal-bg);flex-shrink:0;width:100%;box-shadow:0 -4px 20px rgba(0,0,0,.5);z-index:25;position:relative}
         #instruction-view h2{font-size:1.2rem;text-align:center;color:white;margin:0}
+        #privacy-view h2{font-size:1.5rem;text-align:center;color:white;margin:0}
         .help-section{margin-bottom:25px}
         .help-section h3{font-size:.95rem;color:var(--accent-blue);margin-bottom:10px;font-weight:600}
         .help-section ul{list-style:none;padding-left:5px}
@@ -160,7 +163,6 @@
         @keyframes popIn { from { transform:translate(-50%, 20px); opacity:0; } to { transform:translate(-50%, 0); opacity:1; } }
         #ai-enhance-popup span { font-size:.85rem; font-weight:600; color:white; white-space:nowrap; }
 
-        /* SCREENSHOT DETECTION ADDITION */
         #screenshot-notification { position:fixed; bottom:110px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,.8); border:1px solid #333; padding:12px 20px; border-radius:30px; display:none; align-items:center; gap:10px; z-index:410; backdrop-filter:blur(10px); transition:opacity .3s ease, transform .3s ease; animation:popIn .4s cubic-bezier(0.175,0.885,0.32,1.275); }
         #screenshot-notification.hide { opacity:0; pointer-events:none; }
         #screenshot-notification span { font-size:.85rem; font-weight:600; color:white; white-space:nowrap; }
@@ -169,7 +171,6 @@
 <body class="modal-active">
     <div id="media-viewer" onclick="this.style.display='none'"></div>
     
-    <!-- SCREENSHOT DETECTION ADDITION -->
     <div id="screenshot-notification">
         <svg viewBox="0 0 24 24" width="18" fill="var(--record-red)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
         <span>The user may have taken a screenshot.</span>
@@ -248,7 +249,13 @@
                 <div class="pref-item"><span class="pref-label">Hide IP Address</span><label class="ios-toggle"><input type="checkbox" id="pref-hide-ip" checked><span class="slider"></span></label></div>
                 <div class="pref-item"><span class="pref-label">Auto-delete on leave</span><label class="ios-toggle"><input type="checkbox" id="pref-auto-delete" checked><span class="slider"></span></label></div>
             </div>
-            <div id="help-trigger" onclick="toggleHelp(true)">Getting Started with Whisper?</div>
+            
+            <div class="footer-links-container">
+                <div id="help-trigger" onclick="toggleHelp(true)">Getting Started with Whisper?</div>
+                <span class="link-separator">|</span>
+                <div id="privacy-trigger" onclick="togglePrivacy(true)">Privacy Policy</div>
+            </div>
+            
             <div id="instruction-view">
                 <div class="instruction-header"><h2>Getting Started with Whisper</h2></div>
                 <div class="instruction-scroll-content">
@@ -257,6 +264,20 @@
                     <div class="help-section"><h3>Optional privacy controls</h3><ul><li><strong>Swiss Protection:</strong> Enhanced privacy powered by Switzerland’s strong data protection standards.</li><li><strong>Hide IP Address:</strong> keeps your network identity hidden.</li><li><strong>Auto-delete on leave:</strong> removes all messages when you exit the chat.</li></ul></div>
                 </div>
                 <div class="instruction-footer"><button class="btn" style="background:#222;color:white;min-height:44px" onclick="toggleHelp(false)">Back</button></div>
+            </div>
+
+            <div id="privacy-view">
+                <div class="instruction-header">
+                    <h2>Privacy Policy</h2>
+                    <div style="text-align:center; font-size:0.85rem; color:var(--accent-blue); margin-top:5px; font-weight:600;">We don't track you.</div>
+                    <div style="text-align:center; font-size:0.75rem; color:#777; margin-top:2px;">Last updated: March 2026</div>
+                </div>
+                <div class="instruction-scroll-content">
+                    <p style="font-size:0.8rem; color:#ccc; line-height:1.6; text-align:justify;">
+                        Whisper | Private Messaging (“Whisper”, “the Service”) is a stateless, client-executed, browser-resident communication substrate operating over decentralized peer-to-peer (“P2P”) transport primitives implemented through WebRTC. The Service is distributed as static assets and does not maintain any server-side application layer, persistent datastore, account registry, or identity resolution framework under the control of the developer. The Service does not solicit, ingest, persist, or centrally process personally identifiable information, nor does it implement authentication, credentialing, or durable user-account constructs. All interaction occurs within an ephemeral, session-scoped execution context without persistent identity correlation. User-originated payloads, including textual, audiovisual, and file-based transmissions, are instantiated and processed exclusively within the client runtime environment and are conveyed directly between peer endpoints via WebRTC transport channels. Such payloads are not retained within developer-controlled infrastructure and remain transient within volatile browser memory for the duration of an active session. Session establishment is mediated through ICE negotiation, and network traversal may require the exchange of connection descriptors and related network-layer identifiers necessary for peer bootstrap. Data-in-transit is protected by browser-enforced cryptographic transport primitives, including DTLS and SRTP. The Service neither accesses nor retains communication content and is not positioned within the payload transmission path. The Service does not deploy cookies, behavioral telemetry, profiling instrumentation, or analytics mechanisms. Limited client-side storage may be utilized solely for non-sensitive functional state and does not constitute personal data processing. The Service may depend on third-party infrastructure for delivery or session coordination, and such infrastructure may independently process technical request metadata in accordance with its own policies. The Service is not intended for individuals under the age of 13. This Privacy Policy may be revised to reflect architectural or legal changes. Continued use of the Service constitutes acceptance of the updated version.
+                    </p>
+                </div>
+                <div class="instruction-footer"><button class="btn" style="background:#222;color:white;min-height:44px" onclick="togglePrivacy(false)">Back</button></div>
             </div>
         </div>
         <button onclick="installPWA()" class="install-btn" id="install-btn">
@@ -305,7 +326,6 @@
         const chatContainer=document.getElementById('chat-container'),msgInput=document.getElementById('msg-input'),peerCodeInput=document.getElementById('peer-code-input'),fileInput=document.getElementById('file-input'),modal=document.getElementById('p2p-modal'),exitBtn=document.getElementById('exit-btn'),headerCallBtn=document.getElementById('header-call-btn'),headerVideoCallBtn=document.getElementById('header-video-call-btn'),confirmModal=document.getElementById('confirm-modal'),normalMode=document.getElementById('normal-input-mode'),voiceMode=document.getElementById('voice-input-mode'),visualizer=document.getElementById('visualizer'),timerDisplay=document.getElementById('rec-timer'),suggestionContainer=document.getElementById('suggestion-container'),callOverlay=document.getElementById('call-overlay'),videoCallOverlay=document.getElementById('video-call-overlay'),remoteVideo=document.getElementById('remote-video'),localVideo=document.getElementById('local-video'),callStatus=document.getElementById('call-status'),callControls=document.getElementById('call-controls'),troubleshootPanel=document.getElementById('troubleshoot-panel'),typingIndicator=document.getElementById('typing-indicator'),connectionStatus=document.getElementById('connection-status'),body=document.body,installBtn=document.getElementById('install-btn');
         let peer,conn,mediaRecorder,audioChunks=[],recordInterval,startTime,audioContext,analyser,dataArray,animationFrame,localUserSentMessage=false,currentCall=null,localStream=null,callAudioCtx,callAnalyser,callDataArray,callAnimFrame,pendingSeenReceipt=false,connectionAttempts=0,lastAttemptedCode="",typingTimeout,unseenCount=0,titleFlasher=null,deferredPrompt=null,offlineTimer=null,secondsLeft=180,isVideoCall=false,currentFacingMode='user',isAudioMuted=false,callTimeoutTimer=null,aiPopupTimer=null;
         
-        /* VIDEO ENHANCEMENT ADDITION */
         function optimizeVideoBitrate(callObj) {
             if (!callObj || !callObj.peerConnection) return;
             try {
@@ -314,7 +334,7 @@
                 if (videoSender && videoSender.getParameters) {
                     const params = videoSender.getParameters();
                     if (params.encodings && params.encodings.length > 0) {
-                        params.encodings[0].maxBitrate = 2500000; // 2.5 Mbps
+                        params.encodings[0].maxBitrate = 2500000;
                         videoSender.setParameters(params).catch(e => console.warn('Bitrate err', e));
                     }
                 }
@@ -366,7 +386,6 @@
             }, 5000);
         });
 
-        /* SCREENSHOT DETECTION ADDITION (EXPANDED) */
         function showScreenshotNotification() {
             const notif = document.getElementById('screenshot-notification');
             notif.classList.remove('hide');
@@ -381,7 +400,7 @@
         let lastScreenshotTrigger = 0;
         function triggerScreenshot() {
             const now = Date.now();
-            if (now - lastScreenshotTrigger < 2000) return; // Debounce 2 seconds to prevent spam
+            if (now - lastScreenshotTrigger < 2000) return; 
             lastScreenshotTrigger = now;
             if (conn && conn.open) {
                 conn.send('WHISPER_SCREENSHOT');
@@ -392,20 +411,16 @@
             const key = e.key ? e.key.toLowerCase() : '';
             let isScreenshot = false;
 
-            // 1. PrintScreen key (handles PrtScn, Alt+PrtScn, Shift+PrtScn, Ctrl+PrtScn, Win+PrtScn, Meta+PrtScn, etc.)
             if (key === 'printscreen' || e.keyCode === 44) isScreenshot = true;
 
-            // 2. Windows Snipping / Game Bar shortcuts
-            if (e.metaKey && e.shiftKey && key === 's') isScreenshot = true; // Win + Shift + S
-            if (e.metaKey && key === 'g') isScreenshot = true; // Win + G
+            if (e.metaKey && e.shiftKey && key === 's') isScreenshot = true; 
+            if (e.metaKey && key === 'g') isScreenshot = true; 
 
-            // 3. MacOS Screenshot shortcuts (Cmd + Shift + 3, 4, 5, 6) including Control modifiers
             if (e.metaKey && e.shiftKey && ['3','4','5','6'].includes(key)) isScreenshot = true; 
 
-            // 4. Browser/DevTools Shortcuts (Ctrl/Cmd + Shift + S/I/P/C/J/X and Ctrl/Cmd + P/C)
             const isCmdOrCtrl = e.metaKey || e.ctrlKey;
             if (isCmdOrCtrl && e.shiftKey && ['s','i','p','c','j','x'].includes(key)) isScreenshot = true;
-            if (isCmdOrCtrl && ['p', 'c'].includes(key)) isScreenshot = true; // Includes Ctrl+C / Cmd+C
+            if (isCmdOrCtrl && ['p', 'c'].includes(key)) isScreenshot = true; 
 
             if (isScreenshot) {
                 triggerScreenshot();
@@ -414,13 +429,11 @@
 
         document.addEventListener('keyup', (e) => {
             const key = e.key ? e.key.toLowerCase() : '';
-            // PrintScreen often only fires on keyup in Windows depending on the exact combination
             if (key === 'printscreen' || e.keyCode === 44) {
                 triggerScreenshot();
             }
         });
 
-        // 5. Mobile Gestures (3-finger swipe down)
         let touchStartY = 0;
         let isThreeFinger = false;
 
@@ -428,7 +441,7 @@
             if (e.touches.length >= 3) {
                 isThreeFinger = true;
                 touchStartY = e.touches[0].clientY;
-                triggerScreenshot(); // Immediate trigger for aggressive OS gestures
+                triggerScreenshot(); 
             }
         }, {passive: true});
 
@@ -437,7 +450,7 @@
                 let currentY = e.touches[0].clientY;
                 if (currentY - touchStartY > 50) { 
                     triggerScreenshot();
-                    isThreeFinger = false; // reset
+                    isThreeFinger = false; 
                 }
             }
         }, {passive: true});
@@ -473,11 +486,9 @@
         async function initiateVoiceCall(){if(!conn?.open)return;try{localStream=await navigator.mediaDevices.getUserMedia({audio:getAudioConstraints()});currentCall=peer.call(conn.peer,localStream);showCallOverlay("Calling...");showAIPopup();renderCallControls([{label:'<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg>',class:'btn-hangup',action:()=>endCall(false)}]);setupRippleFeedback(localStream);callTimeoutTimer=setTimeout(()=>{endCall(false);appendMessage("Call unanswered",'system')},30000);currentCall.on('stream',(remoteStream)=>{if(callTimeoutTimer)clearTimeout(callTimeoutTimer);setupRippleFeedback(remoteStream);callStatus.textContent="You’re on a private call";renderCallControls([{label:'<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>',class:'btn-mute-mic',bg:'#333',action:toggleMute},{label:'<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg>',class:'btn-hangup',action:()=>endCall(false)}]);const audio=new Audio();audio.srcObject=remoteStream;audio.play();setCallTitle()});currentCall.on('close',()=>endCall(true))}catch(err){appendMessage("Microphone access denied. Allow permissions for the voice call.","system")}}
         
         async function initiateVideoCall(){if(!conn?.open)return;try{isVideoCall=true;currentFacingMode='user';localVideo.classList.add('mirror');
-        /* VIDEO ENHANCEMENT ADDITION */
         const videoConstraints = { facingMode: currentFacingMode, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } };
         localStream=await navigator.mediaDevices.getUserMedia({audio:getAudioConstraints(),video:videoConstraints});
         localVideo.srcObject=localStream;currentCall=peer.call(conn.peer,localStream,{metadata:{type:'video'}});
-        /* VIDEO ENHANCEMENT ADDITION */
         setTimeout(() => optimizeVideoBitrate(currentCall), 1000);
         videoCallOverlay.style.display='flex';showAIPopup();setCallTitle();callTimeoutTimer=setTimeout(()=>{endCall(false);appendMessage("Call unanswered",'system')},30000);currentCall.on('stream',(remoteStream)=>{if(callTimeoutTimer)clearTimeout(callTimeoutTimer);remoteVideo.srcObject=remoteStream;});currentCall.on('close',()=>endCall(true))}catch(err){appendMessage("Camera or microphone access denied. Allow permissions for the video call.","system")}}
         
@@ -486,11 +497,9 @@
         async function acceptIncomingCall(){try{localStream=await navigator.mediaDevices.getUserMedia({audio:getAudioConstraints()});currentCall.answer(localStream);callStatus.textContent="Connecting...";showAIPopup();renderCallControls([{label:'<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg>',class:'btn-hangup',action:()=>endCall(false)}]);currentCall.on('stream',(remoteStream)=>{setupRippleFeedback(remoteStream);callStatus.textContent="You’re on a private call";renderCallControls([{label:'<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>',class:'btn-mute-mic',bg:'#333',action:toggleMute},{label:'<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg>',class:'btn-hangup',action:()=>endCall(false)}]);const audio=new Audio();audio.srcObject=remoteStream;audio.play();setCallTitle()});currentCall.on('close',()=>endCall(true))}catch(err){endCall(false)}}
         
         async function acceptIncomingVideoCall(){try{isVideoCall=true;currentFacingMode='user';localVideo.classList.add('mirror');
-        /* VIDEO ENHANCEMENT ADDITION */
         const videoConstraints = { facingMode: currentFacingMode, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } };
         localStream=await navigator.mediaDevices.getUserMedia({audio:getAudioConstraints(),video:videoConstraints});
         localVideo.srcObject=localStream;currentCall.answer(localStream);
-        /* VIDEO ENHANCEMENT ADDITION */
         setTimeout(() => optimizeVideoBitrate(currentCall), 1000);
         callOverlay.style.display='none';videoCallOverlay.style.display='flex';showAIPopup();setCallTitle();currentCall.on('stream',(remoteStream)=>{remoteVideo.srcObject=remoteStream;});currentCall.on('close',()=>endCall(true))}catch(err){endCall(false)}}
         
@@ -509,13 +518,11 @@
             try {
                 let newStream;
                 try {
-                    /* VIDEO ENHANCEMENT ADDITION */
                     const switchConstraints = { facingMode: targetMode === 'environment' ? { exact: 'environment' } : 'user', width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } };
                     newStream = await navigator.mediaDevices.getUserMedia({
                         video: switchConstraints
                     });
                 } catch (e) {
-                    /* VIDEO ENHANCEMENT ADDITION */
                     const fbConstraints = { facingMode: targetMode, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } };
                     newStream = await navigator.mediaDevices.getUserMedia({
                         video: fbConstraints
@@ -528,7 +535,6 @@
                     const sender = currentCall.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
                     if (sender) {
                         await sender.replaceTrack(newVideoTrack);
-                        /* VIDEO ENHANCEMENT ADDITION */
                         optimizeVideoBitrate(currentCall);
                     }
                 }
@@ -564,7 +570,6 @@
             if(data==='WHISPER_SEEN'){markLastSeen();return}
             if(data==='WHISPER_TYPING_ON'){showTypingIndicator(true);return}
             if(data==='WHISPER_TYPING_OFF'){showTypingIndicator(false);return}
-            /* SCREENSHOT DETECTION ADDITION (EXPANDED) */
             if(data==='WHISPER_SCREENSHOT'){showScreenshotNotification();return}
             showTypingIndicator(false);
 
@@ -646,7 +651,20 @@
         function exitChatroom(){location.reload()}
         function copyCode(){const code=document.getElementById('my-code').textContent;if(code==="..."||code==="COPIED")return;navigator.clipboard.writeText(code);const original=code;document.getElementById('my-code').textContent="COPIED";setTimeout(()=>document.getElementById('my-code').textContent=original,1000)}
         function copyLink(){const code=document.getElementById('my-code').textContent;if(code==="..."||code==="COPIED")return;const url=window.location.href.split('?')[0]+'?code='+code;navigator.clipboard.writeText(url).then(()=>{const btn=document.getElementById('link-share-btn');const originalHTML=btn.innerHTML;btn.innerHTML='<span style="font-size:1.2rem">✓</span>';setTimeout(()=>btn.innerHTML=originalHTML,1500)})}
-        function toggleHelp(show){const helpView=document.getElementById('instruction-view');helpView.style.display=show?'flex':'none'}
+        
+        function toggleHelp(show){
+            const helpView=document.getElementById('instruction-view');
+            const mc=document.querySelector('.modal-content');
+            helpView.style.display=show?'flex':'none';
+            if(show){mc.scrollTop=0;mc.style.overflowY='hidden'}else{mc.style.overflowY='auto'}
+        }
+        function togglePrivacy(show){
+            const privacyView=document.getElementById('privacy-view');
+            const mc=document.querySelector('.modal-content');
+            privacyView.style.display=show?'flex':'none';
+            if(show){mc.scrollTop=0;mc.style.overflowY='hidden'}else{mc.style.overflowY='auto'}
+        }
+        
         window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault();deferredPrompt=e});
         function installPWA(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then((choice)=>{if(choice.outcome==='accepted')installBtn.style.display='none';deferredPrompt=null})}else{alert("Whisper can only be installed using Chrome, Edge, or Safari. Please open this site in one of these browsers to install the app on your device.")}}
         if(window.matchMedia('(display-mode: standalone)').matches){installBtn.style.display='none'}
