@@ -809,7 +809,7 @@
         }
         
         window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault();deferredPrompt=e});
-        function installPWA(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then((choice)=>{if(choice.outcome==='accepted')installBtn.style.display='none';deferredPrompt=null})}else{alert("Whisper can only be installed using Chrome, Edge, or Safari. Please open this site in one of these browsers to install the app on your device.")}}
+        function installPWA(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then((choice)=>{if(choice.outcome==='accepted')installBtn.style.display='none';deferredPrompt=null})}else{alert("Whisper works only on Chromium-based browsers like Brave, Edge, and Chrome. Please open Whisper in one of them to install in seconds.")}}
         if(window.matchMedia('(display-mode: standalone)').matches){installBtn.style.display='none'}
         window.addEventListener('appinstalled',()=>{installBtn.style.display='none'});
         document.addEventListener('contextmenu',event=>event.preventDefault());
