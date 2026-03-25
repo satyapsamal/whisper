@@ -26,7 +26,13 @@
       "type": "image/png",
       "form_factor": "wide",
       "label": "World’s most private messaging platform."
+    },
+    {
+      "src": "portrait.png",
+      "sizes": "1080x1350",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Secure, anonymous conversations."
     }
   ]
 }
-
