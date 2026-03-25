@@ -20,13 +20,7 @@
   ],
 
   "screenshots": [
-    {
-      "src": "banner.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "World’s most private messaging platform."
-    },
+
     {
       "src": "portrait.png",
       "sizes": "1080x1350",
