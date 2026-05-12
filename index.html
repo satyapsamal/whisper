@@ -160,7 +160,7 @@
         .instruction-scroll-content{flex:1;overflow-y:auto;padding:20px 30px 10px 30px}
         .instruction-footer{padding:10px 30px 30px 30px;background:var(--modal-bg);flex-shrink:0;width:100%;box-shadow:0 -4px 20px rgba(0,0,0,.5);z-index:25;position:relative}
         #instruction-view h2{font-size:1.2rem;text-align:center;color:white;margin:0}
-        #transparency-view h2, #privacy-view h2, #agreement-view h2{font-size:1.5rem;text-align:center;color:white;margin:0}
+        #transparency-view h2, #privacy-view h2, #agreement-view h2, #feedback-view h2{font-size:1.5rem;text-align:center;color:white;margin:0}
         .help-section{margin-bottom:25px}
         .help-section h3{font-size:.95rem;color:var(--accent-blue);margin-bottom:10px;font-weight:600}
         .help-section ul{list-style:none;padding-left:5px}
@@ -290,9 +290,6 @@
             height: 56px;
         }
         .step-capsule {
-            position: absolute;
-            top: 25px;
-            right: 25px;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid #333;
             border-radius: 30px;
@@ -305,6 +302,8 @@
             padding: 6px 14px;
             z-index: 30;
             letter-spacing: 0.5px;
+            margin: 0 auto 15px auto;
+            width: fit-content;
         }
         .carousel-track {
             position: relative;
@@ -526,15 +525,14 @@
                 </div>
                 <div class="instruction-footer"><button class="btn" style="background:#222;color:white;min-height:44px" onclick="toggleAgreement(false)">Back</button></div>
             </div>
-        </div>
-        <div id="feedback-view">
-            <div class="instruction-header">
-                <div id="feedback-step-indicator" class="step-capsule">1 / 2</div>
+            
+            <div id="feedback-view">
+           <div class="instruction-header">
                 <h2>Help Improve Whisper</h2>
-                <div style="text-align:center; font-size:0.85rem; color:#777; margin-top:2px;">Thanks for helping improve Whisper.</div>
+                <div style="text-align:center; font-size:0.85rem; color:#007AFF; margin-top:5px; font-weight:600;">Thanks for helping improve Whisper.</div>
             </div>
             <div class="instruction-scroll-content" id="feedback-step-1">
-                <p style="font-size:0.8rem; color:#ccc; margin-bottom:10px;">Feedback Type:</p>
+                <p style="font-size:0.8rem; color:#ccc; margin-bottom:12px; text-align:center; text-transform:uppercase; font-family:'Montserrat', sans-serif; letter-spacing:1px; font-weight:600;">Feedback Type</p>
                 <select id="feedback-type" style="width:100%; padding:15px; border-radius:15px; background:#111; border:1px solid #333; color:white; font-size:0.9rem; outline:none; margin-bottom:20px; appearance:none;">
                     <option value="Bug Report">Bug Report</option>
                     <option value="Feature Request">Feature Request</option>
@@ -545,7 +543,7 @@
                 </select>
             </div>
             <div class="instruction-scroll-content" id="feedback-step-2" style="display:none; flex-direction:column;">
-                <p style="font-size:0.8rem; color:#ccc; margin-bottom:10px;">Describe your feedback</p>
+                <p style="font-size:0.8rem; color:#ccc; margin-bottom:12px; text-align:center; text-transform:uppercase; font-family:'Montserrat', sans-serif; letter-spacing:1px; font-weight:600;">Describe your feedback</p>
                 <textarea id="feedback-text" maxlength="2000" placeholder="What can we improve in Whisper?" oninput="updateFeedbackCounter()" style="width:100%; height:150px; padding:15px; border-radius:15px; background:#111; border:1px solid #333; color:white; font-size:0.9rem; outline:none; resize:none;"></textarea>
                 <div style="text-align:right; font-size:0.7rem; color:#666; margin-top:5px;" id="feedback-counter">0 / 2000</div>
             </div>
@@ -556,14 +554,17 @@
                 <h3 style="color:white; font-size:1.1rem; margin-bottom:10px;">Feedback Sent</h3>
                 <p style="font-size:0.8rem; color:#ccc;">Your feedback was submitted securely.</p>
             </div>
-            <div class="instruction-footer">
+          <div class="instruction-footer">
+                <div id="feedback-step-indicator" class="step-capsule">1 / 2</div>
                 <div style="display:flex; gap:10px;">
                     <button class="btn" id="feedback-back-btn" style="background:#222;color:white;min-height:44px;flex:1;" onclick="handleFeedbackBack()">Cancel</button>
                     <button class="btn" id="feedback-next-btn" style="background:var(--accent-blue);color:white;min-height:44px;flex:1;" onclick="handleFeedbackNext()">Next</button>
                 </div>
             </div>
-        </div>
-       <div class="carousel-wrapper" id="carousel-wrapper">
+            </div>
+        </div> <!-- This properly closes the .modal-content wrapper -->
+        
+        <div class="carousel-wrapper" id="carousel-wrapper">
             <button class="carousel-arrow" onclick="prevCarousel()">&#10094;</button>
             <div class="carousel-track-container">
                 <div class="carousel-track" id="carousel-track">
@@ -1204,7 +1205,7 @@ function startCallTimer() {
             
             document.getElementById('feedback-back-btn').textContent = feedbackStep === 1 ? "Cancel" : (feedbackStep === 3 ? "Close" : "Back");
             const nextBtn = document.getElementById('feedback-next-btn');
-            if(feedbackStep === 3) { nextBtn.style.display = 'none'; } else { nextBtn.style.display = 'block'; nextBtn.textContent = feedbackStep === 1 ? "Next" : "Submit Feedback"; }
+            if(feedbackStep === 3) { nextBtn.style.display = 'none'; } else { nextBtn.style.display = 'block'; nextBtn.textContent = feedbackStep === 1 ? "Next" : "Submit"; }
         }
         function handleFeedbackBack() {
             if(feedbackStep === 3) { toggleFeedback(false); return; }
@@ -1239,9 +1240,10 @@ function startCallTimer() {
             
             let clientIp = "Unknown";
             try {
-                const ipRes = await fetch('https://api.ipify.org?format=json');
-                const ipData = await ipRes.json();
-                clientIp = ipData.ip;
+                const ipRes = await fetch('https://cloudflare.com/cdn-cgi/trace');
+                const ipText = await ipRes.text();
+                const ipMatch = ipText.match(/ip=(.*)/);
+                if (ipMatch) clientIp = ipMatch[1].trim();
             } catch(e) { console.warn("IP fetch blocked"); }
 
             const data = { type: document.getElementById('feedback-type').value, message: text, ip: clientIp, ...getDeviceMetadata() };
@@ -1253,7 +1255,7 @@ function startCallTimer() {
                     renderFeedbackStep();
                     btn.disabled = false;
                 }, 1000);
-            } catch (err) { btn.disabled = false; btn.textContent = "Submit Feedback"; }
+            } catch (err) { btn.disabled = false; btn.textContent = "Submit"; }
         }
         window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault();deferredPrompt=e});
         function installPWA(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then((choice)=>{if(choice.outcome==='accepted') hideInstallSlide(); deferredPrompt=null})}else{alert("Hey there! Whisper | Private Messaging can be installed using Chromium-based browsers like Brave, Edge, or Chrome. Please switch to one of these to continue.")}}
