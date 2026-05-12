@@ -603,15 +603,9 @@ function startCallTimer() {
        function getAudioConstraints() {
             const isEnhanced = localStorage.getItem('aiEnhancedCall') !== 'false';
             return {
-                echoCancellation: true,
-                noiseSuppression: true,
-                autoGainControl: true,
-                ...(isEnhanced ? {
-                    googEchoCancellation: true,
-                    googNoiseSuppression: true,
-                    googAutoGainControl: true,
-                    googHighpassFilter: true
-                } : {})
+                echoCancellation: isEnhanced,
+                noiseSuppression: isEnhanced,
+                autoGainControl: isEnhanced
             };
         }
 
