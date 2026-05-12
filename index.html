@@ -229,8 +229,7 @@
         @keyframes popIn { from { transform:translate(-50%, 20px); opacity:0; } to { transform:translate(-50%, 0); opacity:1; } }
         
         #ai-enhance-popup span, #peek-popup span, #screenshot-notification span { font-size:.85rem; font-weight:600; color:white; white-space:nowrap; }
-/* Encryption Status Capsule */
-        .encryption-capsule {
+.encryption-capsule {
             position: absolute;
             top: 30px;
             left: 50%;
@@ -252,6 +251,10 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
             letter-spacing: 0.5px;
             pointer-events: none;
+            /* Added fixes for jitter */
+            min-width: 230px;
+            box-sizing: border-box;
+            font-variant-numeric: tabular-nums;
         }
         .encryption-capsule svg {
             width: 12px;
@@ -735,10 +738,10 @@ function startCallTimer() {
 
         function markLastSeen(){const activeSeen=document.querySelectorAll('.msg-seen.active');activeSeen.forEach(el=>el.classList.remove('active'));const sentMessages=document.querySelectorAll('.message.sent .msg-seen');if(sentMessages.length>0)sentMessages[sentMessages.length-1].classList.add('active')}
         
-        function initPeer(){const shortId=Math.random().toString(36).substr(2,6).toUpperCase();peer=new Peer('WSP-'+shortId,{config:{'iceServers':[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]}});peer.on('open',(id)=>document.getElementById('my-code').textContent=id);peer.on('connection',(incomingConn)=>{conn=incomingConn;setupChatListeners()});peer.on('call',showIncomingCallUI);peer.on('error',(err)=>{console.error(err);resetConnectButton()});setInterval(()=>{if(peer&&peer.disconnected&&!peer.destroyed){peer.reconnect()}},15000)}
+        function initPeer(){const shortId=Math.random().toString(36).substr(2,6).toUpperCase();peer=new Peer('WSP-'+shortId,{config:{'iceServers':[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:stun.cloudflare.com:3478'}],'iceCandidatePoolSize':10}});peer.on('open',(id)=>document.getElementById('my-code').textContent=id);peer.on('connection',(incomingConn)=>{conn=incomingConn;setupChatListeners()});peer.on('call',showIncomingCallUI);peer.on('error',(err)=>{console.error(err);resetConnectButton()});setInterval(()=>{if(peer&&peer.disconnected&&!peer.destroyed){peer.reconnect()}},15000)}
         function handleConnectClick(){const rawId=peerCodeInput.value.trim();if(!rawId||rawId.length<=4)return;const normalizedId=rawId.toUpperCase();if(normalizedId===lastAttemptedCode)connectionAttempts++;else{connectionAttempts=1;lastAttemptedCode=normalizedId}const btnText=document.getElementById('btn-text'),btnSpinner=document.getElementById('btn-spinner'),connectBtn=document.getElementById('connect-btn');btnText.style.display='none';btnSpinner.style.display='block';connectBtn.disabled=true;setTimeout(()=>connectToPeer(normalizedId),2000)}
         function resetConnectButton(){document.getElementById('btn-text').style.display='block';document.getElementById('btn-spinner').style.display='none';document.getElementById('connect-btn').disabled=false;if(connectionAttempts>=2)troubleshootPanel.style.display='block'}
-        function connectToPeer(peerId){conn=peer.connect(peerId,{reliable:true});const connectionTimeout=setTimeout(()=>{if(!conn.open)resetConnectButton()},6000);conn.on('open',()=>{clearTimeout(connectionTimeout);body.classList.remove('modal-active');modal.style.display='none';exitBtn.style.display='flex';headerCallBtn.style.display='flex';headerVideoCallBtn.style.display='flex';headerPrivacyBtn.style.display='flex';sendVisibilityStatus();updatePeerStatus(true);appendMessage("Private connection active. No government, big tech, or trackers involved.",'system');if(!localUserSentMessage)suggestionContainer.style.display='flex';conn.on('data',handleIncomingData);conn.on('close',()=>handleDisconnect())});conn.on('error',()=>{clearTimeout(connectionTimeout);resetConnectButton()})}
+        function connectToPeer(peerId){conn=peer.connect(peerId,{reliable:true});const connectionTimeout=setTimeout(()=>{if(!conn.open)resetConnectButton()},15000);conn.on('open',()=>{clearTimeout(connectionTimeout);body.classList.remove('modal-active');modal.style.display='none';exitBtn.style.display='flex';headerCallBtn.style.display='flex';headerVideoCallBtn.style.display='flex';headerPrivacyBtn.style.display='flex';sendVisibilityStatus();updatePeerStatus(true);appendMessage("Private connection active. No government, big tech, or trackers involved.",'system');if(!localUserSentMessage)suggestionContainer.style.display='flex';conn.on('data',handleIncomingData);conn.on('close',()=>handleDisconnect())});conn.on('error',()=>{clearTimeout(connectionTimeout);resetConnectButton()})}
         function setupChatListeners(){conn.on('open',()=>{body.classList.remove('modal-active');modal.style.display='none';exitBtn.style.display='flex';headerCallBtn.style.display='flex';headerVideoCallBtn.style.display='flex';headerPrivacyBtn.style.display='flex';sendVisibilityStatus();updatePeerStatus(true);appendMessage("Private connection active. No government, big tech, or trackers involved.",'system');if(!localUserSentMessage)suggestionContainer.style.display='flex';conn.on('data',handleIncomingData)});conn.on('close',()=>handleDisconnect())}
         function handleDisconnect(){if(msgInput.disabled)return;const autoDelete=document.getElementById('pref-auto-delete').checked;if(autoDelete){const indicator=typingIndicator.cloneNode(true);chatContainer.innerHTML='';chatContainer.appendChild(indicator);}appendMessage("Private connection ended. This chat left no traces.",'system');msgInput.disabled=true;msgInput.placeholder="Private connection ended.";document.getElementById('voice-trigger').style.display='none';document.getElementById('file-input').disabled=true;headerCallBtn.style.display='none';headerVideoCallBtn.style.display='none';headerPrivacyBtn.style.display='none';updatePeerStatus(false);stopFlasher();document.title="Whisper | Private Messaging"}
         
