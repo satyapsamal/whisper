@@ -355,12 +355,20 @@
                 top: 30px; 
                 padding: 8px 16px; 
             }
-            .video-capsule.compact .capsule-label { 
+          .video-capsule.compact .capsule-label { 
                 max-width: 0; 
                 opacity: 0; 
                 margin-left: -6px; 
                 pointer-events: none; 
             }
+            #feedback-view h2 { 
+                white-space: nowrap; 
+            }
+            #feedback-view .instruction-header { 
+                padding-left: 15px; 
+                padding-right: 15px; 
+            }
+        }
         }
         /* Privacy Mode Overrides */
         body.privacy-mode-active .message:not(.system) .text-content {
@@ -551,7 +559,7 @@
                 <div style="margin-bottom:15px;">
                     <svg viewBox="0 0 24 24" width="60" height="60" fill="var(--call-green)"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
                 </div>
-                <h3 style="color:white; font-size:1.1rem; margin-bottom:10px;">Feedback Sent</h3>
+                <h3 style="color:white; font-size:1.1rem; margin-bottom:10px;">Feedback Submitted</h3>
                 <p style="font-size:0.8rem; color:#ccc;">Your feedback was submitted securely.</p>
             </div>
           <div class="instruction-footer">
@@ -1236,7 +1244,7 @@ function startCallTimer() {
             const text = document.getElementById('feedback-text').value.trim();
             if (!text) { alert("Please describe your feedback."); return; }
             const btn = document.getElementById('feedback-next-btn');
-            btn.disabled = true; btn.textContent = "Sending...";
+            btn.disabled = true; btn.textContent = "Submitting...";
             
             let clientIp = "Unknown";
             try {
