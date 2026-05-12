@@ -262,6 +262,107 @@
             fill: currentColor;
             opacity: 0.8;
         }
+        .capsule-label {
+            display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            transition: max-width 0.5s ease, opacity 0.4s ease, margin 0.5s ease;
+            max-width: 250px;
+            opacity: 1;
+        }
+
+        .carousel-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 90%;
+            max-width: 400px;
+            gap: 10px;
+            animation: modalPop .4s cubic-bezier(0.175,0.885,0.32,1.275);
+            animation-fill-mode: backwards;
+            animation-delay: .1s;
+        }
+        .carousel-track-container {
+            overflow: hidden;
+            flex: 1;
+            border-radius: 35px;
+            position: relative;
+            height: 56px;
+        }
+        .step-capsule {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #333;
+            border-radius: 30px;
+            color: #eee;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 14px;
+            z-index: 30;
+            letter-spacing: 0.5px;
+        }
+        .carousel-track {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .carousel-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease;
+        }
+        .carousel-slide.active-slide {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+        .carousel-arrow {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid #333;
+            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+        .carousel-arrow:hover { background: rgba(255,255,255,0.15); }
+        
+        #feedback-view { display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:var(--modal-bg); z-index:20; border-radius:35px; padding:0; flex-direction:column; text-align:left; overflow:hidden; }
+
+        @media (max-width: 768px) {
+            .encryption-capsule { min-width: auto; }
+            .voice-capsule { white-space: nowrap; width: max-content; }
+            .video-capsule { 
+                top: calc(100% - 130px); 
+                transition: top 0.8s cubic-bezier(0.25, 1, 0.5, 1), padding 0.5s ease; 
+            }
+            .video-capsule.compact { 
+                top: 30px; 
+                padding: 8px 16px; 
+            }
+            .video-capsule.compact .capsule-label { 
+                max-width: 0; 
+                opacity: 0; 
+                margin-left: -6px; 
+                pointer-events: none; 
+            }
+        }
         /* Privacy Mode Overrides */
         body.privacy-mode-active .message:not(.system) .text-content {
             color: transparent !important;
@@ -291,9 +392,9 @@
     <div id="media-viewer" onclick="this.style.display='none'"></div>
     
    <div id="call-overlay">
-        <div class="encryption-capsule">
+        <div class="encryption-capsule voice-capsule">
             <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/></svg>
-            <span>End-to-End Encrypted | <span class="call-timer-display">0:00</span></span>
+            <span class="capsule-label">End-to-End Encrypted |&nbsp;</span><span class="call-timer-display">0:00</span>
         </div>
         <div class="call-avatar-wrapper">
             <div class="call-ripple" id="ripple-1"></div>
@@ -307,9 +408,9 @@
     
     <div id="video-call-overlay">
         <div class="video-dialog">
-            <div class="encryption-capsule">
+            <div class="encryption-capsule video-capsule">
                 <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/></svg>
-                <span>End-to-End Encrypted | <span class="call-timer-display">0:00</span></span>
+                <span class="capsule-label">End-to-End Encrypted |&nbsp;</span><span class="call-timer-display">0:00</span>
             </div>
             <video id="remote-video" autoplay playsinline></video>
             <video id="local-video" class="mirror" autoplay playsinline muted></video>
@@ -426,9 +527,56 @@
                 <div class="instruction-footer"><button class="btn" style="background:#222;color:white;min-height:44px" onclick="toggleAgreement(false)">Back</button></div>
             </div>
         </div>
-        <button onclick="installPWA()" class="install-btn" id="install-btn">
-            <span class="install-text">Install Whisper in seconds</span>
-        </button>
+        <div id="feedback-view">
+            <div class="instruction-header">
+                <div id="feedback-step-indicator" class="step-capsule">1 / 2</div>
+                <h2>Help Improve Whisper</h2>
+                <div style="text-align:center; font-size:0.85rem; color:#777; margin-top:2px;">Thanks for helping improve Whisper.</div>
+            </div>
+            <div class="instruction-scroll-content" id="feedback-step-1">
+                <p style="font-size:0.8rem; color:#ccc; margin-bottom:10px;">Feedback Type:</p>
+                <select id="feedback-type" style="width:100%; padding:15px; border-radius:15px; background:#111; border:1px solid #333; color:white; font-size:0.9rem; outline:none; margin-bottom:20px; appearance:none;">
+                    <option value="Bug Report">Bug Report</option>
+                    <option value="Feature Request">Feature Request</option>
+                    <option value="UI/UX Feedback">UI/UX Feedback</option>
+                    <option value="Performance Issue">Performance Issue</option>
+                    <option value="Privacy Concern">Privacy Concern</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="instruction-scroll-content" id="feedback-step-2" style="display:none; flex-direction:column;">
+                <p style="font-size:0.8rem; color:#ccc; margin-bottom:10px;">Describe your feedback</p>
+                <textarea id="feedback-text" maxlength="2000" placeholder="What can we improve in Whisper?" oninput="updateFeedbackCounter()" style="width:100%; height:150px; padding:15px; border-radius:15px; background:#111; border:1px solid #333; color:white; font-size:0.9rem; outline:none; resize:none;"></textarea>
+                <div style="text-align:right; font-size:0.7rem; color:#666; margin-top:5px;" id="feedback-counter">0 / 2000</div>
+            </div>
+            <div class="instruction-scroll-content" id="feedback-step-3" style="display:none; text-align:center; justify-content:center; flex-direction:column; padding-bottom:40px;">
+                <div style="margin-bottom:15px;">
+                    <svg viewBox="0 0 24 24" width="60" height="60" fill="var(--call-green)"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+                </div>
+                <h3 style="color:white; font-size:1.1rem; margin-bottom:10px;">Feedback Sent</h3>
+                <p style="font-size:0.8rem; color:#ccc;">Your feedback was submitted securely.</p>
+            </div>
+            <div class="instruction-footer">
+                <div style="display:flex; gap:10px;">
+                    <button class="btn" id="feedback-back-btn" style="background:#222;color:white;min-height:44px;flex:1;" onclick="handleFeedbackBack()">Cancel</button>
+                    <button class="btn" id="feedback-next-btn" style="background:var(--accent-blue);color:white;min-height:44px;flex:1;" onclick="handleFeedbackNext()">Next</button>
+                </div>
+            </div>
+        </div>
+       <div class="carousel-wrapper" id="carousel-wrapper">
+            <button class="carousel-arrow" onclick="prevCarousel()">&#10094;</button>
+            <div class="carousel-track-container">
+                <div class="carousel-track" id="carousel-track">
+     <button class="install-btn carousel-slide active-slide" onclick="toggleFeedback(true)" style="margin-top:0; width:100%; max-width:none; transform: translateX(0);">
+                        <span class="install-text">Help Improve Whisper</span>
+                    </button>
+                    <button class="install-btn carousel-slide" id="install-slide" onclick="installPWA()" style="margin-top:0; width:100%; max-width:none;">
+                        <span class="install-text">Install Whisper in seconds</span>
+                    </button>
+                </div>
+            </div>
+            <button class="carousel-arrow" onclick="nextCarousel()">&#10095;</button>
+        </div>
     </div>
     <header>
         <button id="exit-btn" onclick="toggleConfirm(true)">&lsaquo;</button>
@@ -503,6 +651,12 @@
         let callTimerInterval = null;
         let callStartTime = 0;
         let peekPopupTimer = null;
+        let mobileCapsuleTimer = null;
+        let carouselIndex = 0;
+        let carouselSlides = 2;
+        let carouselInterval = setInterval(nextCarousel, 5000);
+        let feedbackStep = 1;
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw732YVWtpfTEzh4eGlYAb6hpj_9OGs43Lh-H1jwQI-g-vMZ4EQvpOUXS1bxaXBA_NH/exec"; // PASTE YOUR URL HERE!
 
         const pIp=document.getElementById('pref-hide-ip'),pMeta=document.getElementById('pref-metadata'),pDel=document.getElementById('pref-auto-delete');
         pIp.checked=localStorage.getItem('prefIp')!=='false';
@@ -747,13 +901,13 @@ function startCallTimer() {
         
         async function initiateVoiceCall(){if(!conn?.open)return;if(peer&&peer.disconnected&&!peer.destroyed)peer.reconnect();conn.send('WHISPER_PREPARE_CALL');try{localStream=await navigator.mediaDevices.getUserMedia({audio:getAudioConstraints()});let checks=0;while(peer.disconnected&&checks<20){await new Promise(r=>setTimeout(r,100));checks++;}await new Promise(r=>setTimeout(r,500));currentCall=peer.call(conn.peer,localStream);showCallOverlay("Calling...");showAIPopup();renderCallControls([{label:'<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg>',class:'btn-hangup',action:()=>endCall(false)}]);setupRippleFeedback(localStream);callTimeoutTimer=setTimeout(()=>{endCall(false);appendMessage("Call unanswered",'system')},30000);currentCall.on('stream',(remoteStream)=>{if(callTimeoutTimer)clearTimeout(callTimeoutTimer);startCallTimer();setupRippleFeedback(remoteStream);callStatus.textContent="You’re on a private call";renderCallControls([{label:'<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>',class:'btn-mute-mic',bg:'#333',action:toggleMute},{label:'<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg>',class:'btn-hangup',action:()=>endCall(false)}]);remoteAudioObj=new Audio();remoteAudioObj.srcObject=remoteStream;remoteAudioObj.play().catch(e=>console.warn(e));setCallTitle()});currentCall.on('close',()=>endCall(true))}catch(err){appendMessage("Microphone access denied. Allow permissions for the voice call.","system")}}
         
-        async function initiateVideoCall(){if(!conn?.open)return;if(peer&&peer.disconnected&&!peer.destroyed)peer.reconnect();conn.send('WHISPER_PREPARE_CALL');try{isVideoCall=true;currentFacingMode='user';localVideo.classList.add('mirror');const videoConstraints={facingMode:currentFacingMode,width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}};localStream=await navigator.mediaDevices.getUserMedia({audio:getAudioConstraints(),video:videoConstraints});localVideo.srcObject=localStream;let checks=0;while(peer.disconnected&&checks<20){await new Promise(r=>setTimeout(r,100));checks++;}await new Promise(r=>setTimeout(r,500));currentCall=peer.call(conn.peer,localStream,{metadata:{type:'video'}});setTimeout(()=>applyAdaptiveQoS(currentCall),1000);videoCallOverlay.style.display='flex';showAIPopup();setCallTitle();callTimeoutTimer=setTimeout(()=>{endCall(false);appendMessage("Call unanswered",'system')},30000);currentCall.on('stream',(remoteStream)=>{if(callTimeoutTimer)clearTimeout(callTimeoutTimer);startCallTimer();remoteVideo.srcObject=remoteStream;remoteVideo.play().catch(e=>console.warn(e));});currentCall.on('close',()=>endCall(true))}catch(err){appendMessage("Camera or microphone access denied. Allow permissions for the video call.","system")}}
+        async function initiateVideoCall(){if(!conn?.open)return;if(peer&&peer.disconnected&&!peer.destroyed)peer.reconnect();conn.send('WHISPER_PREPARE_CALL');try{isVideoCall=true;currentFacingMode='user';localVideo.classList.add('mirror');const videoConstraints={facingMode:currentFacingMode,width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}};localStream=await navigator.mediaDevices.getUserMedia({audio:getAudioConstraints(),video:videoConstraints});localVideo.srcObject=localStream;let checks=0;while(peer.disconnected&&checks<20){await new Promise(r=>setTimeout(r,100));checks++;}await new Promise(r=>setTimeout(r,500));currentCall=peer.call(conn.peer,localStream,{metadata:{type:'video'}});setTimeout(()=>applyAdaptiveQoS(currentCall),1000);videoCallOverlay.style.display='flex';showAIPopup();setCallTitle();callTimeoutTimer=setTimeout(()=>{endCall(false);appendMessage("Call unanswered",'system')},30000);currentCall.on('stream',(remoteStream)=>{if(callTimeoutTimer)clearTimeout(callTimeoutTimer);startCallTimer();remoteVideo.srcObject=remoteStream;remoteVideo.play().catch(e=>console.warn(e)); const isMobile = window.innerWidth <= 768; const videoCapsule = document.querySelector('.video-capsule'); if (isMobile && videoCapsule) { videoCapsule.classList.remove('compact'); if (mobileCapsuleTimer) clearTimeout(mobileCapsuleTimer); mobileCapsuleTimer = setTimeout(() => { videoCapsule.classList.add('compact'); }, 5000); }});currentCall.on('close',()=>endCall(true))}catch(err){appendMessage("Camera or microphone access denied. Allow permissions for the video call.","system")}}
         
         function showIncomingCallUI(incomingCall){if(currentCall){incomingCall.close();return}currentCall=incomingCall;const isVideo=incomingCall.metadata&&incomingCall.metadata.type==='video';isVideoCall=isVideo;showCallOverlay(isVideo?"Someone is calling you privately with a video call...":"Someone’s calling you privately");startIncomingCallFlasher();const acceptAction=isVideo?acceptIncomingVideoCall:acceptIncomingCall;renderCallControls([{label:'<svg viewBox="0 0 24 24" width="28" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>',class:'btn-hangup',action:()=>{currentCall.close();endCall(false)}},{label:'<svg viewBox="0 0 24 24" width="28" fill="currentColor"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>',class:'btn-accept',action:acceptAction}])}
         
         async function acceptIncomingCall(){try{localStream=await navigator.mediaDevices.getUserMedia({audio:getAudioConstraints()});currentCall.answer(localStream);callStatus.textContent="Connecting...";showAIPopup();renderCallControls([{label:'<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg>',class:'btn-hangup',action:()=>endCall(false)}]);currentCall.on('stream',(remoteStream)=>{startCallTimer();setupRippleFeedback(remoteStream);callStatus.textContent="You’re on a private call";renderCallControls([{label:'<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>',class:'btn-mute-mic',bg:'#333',action:toggleMute},{label:'<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg>',class:'btn-hangup',action:()=>endCall(false)}]);remoteAudioObj=new Audio();remoteAudioObj.srcObject=remoteStream;remoteAudioObj.play().catch(e=>console.warn(e));setCallTitle()});currentCall.on('close',()=>endCall(true))}catch(err){endCall(false)}}
         
-        async function acceptIncomingVideoCall(){try{isVideoCall=true;currentFacingMode='user';localVideo.classList.add('mirror');const videoConstraints={facingMode:currentFacingMode,width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}};localStream=await navigator.mediaDevices.getUserMedia({audio:getAudioConstraints(),video:videoConstraints});localVideo.srcObject=localStream;currentCall.answer(localStream);setTimeout(()=>applyAdaptiveQoS(currentCall),1000);callOverlay.style.display='none';videoCallOverlay.style.display='flex';showAIPopup();setCallTitle();currentCall.on('stream',(remoteStream)=>{startCallTimer();remoteVideo.srcObject=remoteStream;remoteVideo.play().catch(e=>console.warn(e));});currentCall.on('close',()=>endCall(true))}catch(err){endCall(false)}}
+        async function acceptIncomingVideoCall(){try{isVideoCall=true;currentFacingMode='user';localVideo.classList.add('mirror');const videoConstraints={facingMode:currentFacingMode,width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}};localStream=await navigator.mediaDevices.getUserMedia({audio:getAudioConstraints(),video:videoConstraints});localVideo.srcObject=localStream;currentCall.answer(localStream);setTimeout(()=>applyAdaptiveQoS(currentCall),1000);callOverlay.style.display='none';videoCallOverlay.style.display='flex';showAIPopup();setCallTitle();currentCall.on('stream',(remoteStream)=>{startCallTimer();remoteVideo.srcObject=remoteStream;remoteVideo.play().catch(e=>console.warn(e)); const isMobile = window.innerWidth <= 768; const videoCapsule = document.querySelector('.video-capsule'); if (isMobile && videoCapsule) { videoCapsule.classList.remove('compact'); if (mobileCapsuleTimer) clearTimeout(mobileCapsuleTimer); mobileCapsuleTimer = setTimeout(() => { videoCapsule.classList.add('compact'); }, 5000); }});currentCall.on('close',()=>endCall(true))}catch(err){endCall(false)}}
         
         function setupRippleFeedback(stream){if(callAnimFrame)cancelAnimationFrame(callAnimFrame);if(callAudioCtx){try{callAudioCtx.close()}catch(e){}}callAudioCtx=new (window.AudioContext||window.webkitAudioContext)();const source=callAudioCtx.createMediaStreamSource(stream);callAnalyser=callAudioCtx.createAnalyser();callAnalyser.fftSize=64;source.connect(callAnalyser);callDataArray=new Uint8Array(callAnalyser.frequencyBinCount);animateRipples()}
         function animateRipples(){callAnimFrame=requestAnimationFrame(animateRipples);callAnalyser.getByteFrequencyData(callDataArray);let sum=0;for(let i=0;i<callDataArray.length;i++)sum+=callDataArray[i];const volume=sum/callDataArray.length;const scale=volume/128;const ripple1=document.getElementById('ripple-1'),ripple2=document.getElementById('ripple-2'),ripple3=document.getElementById('ripple-3');if(scale>0.05){ripple1.style.opacity=0.8;ripple1.style.transform=`scale(${1+scale*0.8})`;ripple2.style.opacity=0.5;ripple2.style.transform=`scale(${1+scale*1.5})`;ripple3.style.opacity=0.3;ripple3.style.transform=`scale(${1+scale*2.2})`}else{[ripple1,ripple2,ripple3].forEach(r=>{r.style.opacity=0;r.style.transform='scale(1)'})}}
@@ -788,7 +942,7 @@ function startCallTimer() {
             } catch (err) { console.error("Camera switch failed", err); }
         }
         
-        function endCall(isRemote=false){stopCallTimer();if(callTimeoutTimer)clearTimeout(callTimeoutTimer);if(!isRemote&&conn&&conn.open)conn.send('WHISPER_CALL_TERMINATED');if(currentCall)currentCall.close();if(localStream){localStream.getTracks().forEach(t=>t.stop());localStream=null}if(callAnimFrame)cancelAnimationFrame(callAnimFrame);if(callAudioCtx){try{callAudioCtx.close()}catch(e){}}if(remoteAudioObj){remoteAudioObj.pause();remoteAudioObj.srcObject=null;remoteAudioObj=null;}callOverlay.style.display='none';videoCallOverlay.style.display='none';document.getElementById('ai-enhance-popup').style.display='none';if(aiPopupTimer)clearTimeout(aiPopupTimer);remoteVideo.srcObject=null;localVideo.srcObject=null;isVideoCall=false;isAudioMuted=false;const muteBtns=document.querySelectorAll('.btn-mute-mic');muteBtns.forEach(btn=>{btn.style.background='#333';btn.innerHTML='<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>';});currentCall=null;const lastMsg=chatContainer.lastElementChild;if(lastMsg&&lastMsg.textContent!=="Private call has ended."&&lastMsg.textContent!=="Call unanswered")appendMessage("The private call has ended.",'system');stopFlasher();updateTitle()}
+        function endCall(isRemote=false){stopCallTimer();if(mobileCapsuleTimer)clearTimeout(mobileCapsuleTimer); const vc = document.querySelector('.video-capsule'); if(vc) vc.classList.remove('compact'); if(callTimeoutTimer)clearTimeout(callTimeoutTimer);if(!isRemote&&conn&&conn.open)conn.send('WHISPER_CALL_TERMINATED');if(currentCall)currentCall.close();if(localStream){localStream.getTracks().forEach(t=>t.stop());localStream=null}if(callAnimFrame)cancelAnimationFrame(callAnimFrame);if(callAudioCtx){try{callAudioCtx.close()}catch(e){}}if(remoteAudioObj){remoteAudioObj.pause();remoteAudioObj.srcObject=null;remoteAudioObj=null;}callOverlay.style.display='none';videoCallOverlay.style.display='none';document.getElementById('ai-enhance-popup').style.display='none';if(aiPopupTimer)clearTimeout(aiPopupTimer);remoteVideo.srcObject=null;localVideo.srcObject=null;isVideoCall=false;isAudioMuted=false;const muteBtns=document.querySelectorAll('.btn-mute-mic');muteBtns.forEach(btn=>{btn.style.background='#333';btn.innerHTML='<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>';});currentCall=null;const lastMsg=chatContainer.lastElementChild;if(lastMsg&&lastMsg.textContent!=="Private call has ended."&&lastMsg.textContent!=="Call unanswered")appendMessage("The private call has ended.",'system');stopFlasher();updateTitle()}
         
         function showCallOverlay(status){callStatus.textContent=status;callOverlay.style.display='flex'}
         function renderCallControls(actions){callControls.innerHTML='';actions.forEach(act=>{const b=document.createElement('button');b.className=`call-action-btn ${act.class}`;b.innerHTML=act.label;if(act.bg)b.style.background=act.bg;b.onclick=act.action;callControls.appendChild(b)})}
@@ -968,10 +1122,143 @@ function startCallTimer() {
             agreementView.style.display=show?'flex':'none';
             if(show){mc.scrollTop=0;mc.style.overflowY='hidden'}else{mc.style.overflowY='auto'}
         }
+        // Carousel Logic
+      // Carousel Logic (Infinite Smooth Directional Sliding)
+        function slideTo(newIndex, direction) {
+            const slides = document.querySelectorAll('.carousel-slide');
+            if(slides.length <= 1 || newIndex === carouselIndex) return;
+            
+            const currentSlide = slides[carouselIndex];
+            const nextSlide = slides[newIndex];
+            
+            nextSlide.style.transition = 'none';
+            nextSlide.style.transform = direction === 'forward' ? 'translateX(100%)' : 'translateX(-100%)';
+            void nextSlide.offsetWidth; // Force Reflow
+            
+            currentSlide.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease';
+            nextSlide.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease';
+            
+            currentSlide.style.transform = direction === 'forward' ? 'translateX(-100%)' : 'translateX(100%)';
+            currentSlide.classList.remove('active-slide');
+            
+            nextSlide.style.transform = 'translateX(0)';
+            nextSlide.classList.add('active-slide');
+            
+            carouselIndex = newIndex;
+        }
+        function nextCarousel() {
+            let nextIdx = (carouselIndex + 1) % carouselSlides;
+            slideTo(nextIdx, 'forward');
+            resetCarouselInterval();
+        }
+        function prevCarousel() {
+            let prevIdx = (carouselIndex - 1 + carouselSlides) % carouselSlides;
+            slideTo(prevIdx, 'backward');
+            resetCarouselInterval();
+        }
+        function resetCarouselInterval() {
+            clearInterval(carouselInterval);
+            carouselInterval = setInterval(nextCarousel, 5000);
+        }
+        function hideInstallSlide() {
+            const slide = document.getElementById('install-slide');
+            if(slide) {
+                slide.style.display = 'none';
+                carouselSlides = 1;
+                if(carouselIndex === 1) prevCarousel();
+                document.querySelectorAll('.carousel-arrow').forEach(a => a.style.display = 'none');
+            }
+        }
+
+        // Feedback Logic
+        function toggleFeedback(show) {
+            const feedbackView = document.getElementById('feedback-view');
+            const mc = document.querySelector('.modal-content');
+            feedbackView.style.display = show ? 'flex' : 'none';
+            if(show) { 
+                mc.scrollTop=0; mc.style.overflowY='hidden'; 
+                feedbackStep = 1;
+                renderFeedbackStep();
+                document.getElementById('feedback-text').value = '';
+                updateFeedbackCounter();
+            } else { 
+                mc.style.overflowY='auto'; 
+            }
+        }
+        function updateFeedbackCounter() {
+            const text = document.getElementById('feedback-text').value;
+            document.getElementById('feedback-counter').textContent = `${text.length} / 2000`;
+        }
+       function renderFeedbackStep() {
+            document.getElementById('feedback-step-1').style.display = feedbackStep === 1 ? 'block' : 'none';
+            document.getElementById('feedback-step-2').style.display = feedbackStep === 2 ? 'flex' : 'none';
+            document.getElementById('feedback-step-3').style.display = feedbackStep === 3 ? 'flex' : 'none';
+            
+            const indicator = document.getElementById('feedback-step-indicator');
+            if (feedbackStep === 3) {
+                indicator.style.display = 'none';
+            } else {
+                indicator.style.display = 'flex';
+                indicator.textContent = `${feedbackStep} / 2`;
+            }
+            
+            document.getElementById('feedback-back-btn').textContent = feedbackStep === 1 ? "Cancel" : (feedbackStep === 3 ? "Close" : "Back");
+            const nextBtn = document.getElementById('feedback-next-btn');
+            if(feedbackStep === 3) { nextBtn.style.display = 'none'; } else { nextBtn.style.display = 'block'; nextBtn.textContent = feedbackStep === 1 ? "Next" : "Submit Feedback"; }
+        }
+        function handleFeedbackBack() {
+            if(feedbackStep === 3) { toggleFeedback(false); return; }
+            if(feedbackStep === 2) { feedbackStep = 1; renderFeedbackStep(); }
+            else { toggleFeedback(false); }
+        }
+        function handleFeedbackNext() {
+            if(feedbackStep === 1) { feedbackStep = 2; renderFeedbackStep(); }
+            else if(feedbackStep === 2) { submitFeedback(); }
+        }
+        function getDeviceMetadata() {
+            const ua = navigator.userAgent;
+            let device = "Desktop", os = "Unknown", browser = "Unknown";
+            if (/Mobi|Android/i.test(ua)) device = "Mobile";
+            if (/Tablet|iPad/i.test(ua)) device = "Tablet";
+            if (ua.indexOf("Win") !== -1) os = "Windows";
+            if (ua.indexOf("Mac") !== -1) os = "MacOS";
+            if (ua.indexOf("Linux") !== -1) os = "Linux";
+            if (ua.indexOf("Android") !== -1) os = "Android";
+            if (ua.indexOf("like Mac") !== -1) os = "iOS";
+            if (ua.indexOf("Chrome") !== -1) browser = "Chrome";
+            if (ua.indexOf("Safari") !== -1 && ua.indexOf("Chrome") === -1) browser = "Safari";
+            if (ua.indexOf("Firefox") !== -1) browser = "Firefox";
+            if (ua.indexOf("Edge") !== -1) browser = "Edge";
+            return { browser, os, device, resolution: `${window.screen.width}x${window.screen.height}`, viewport: `${window.innerWidth}x${window.innerHeight}`, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, language: navigator.language || navigator.userLanguage };
+        }
+        async function submitFeedback() {
+            const text = document.getElementById('feedback-text').value.trim();
+            if (!text) { alert("Please describe your feedback."); return; }
+            const btn = document.getElementById('feedback-next-btn');
+            btn.disabled = true; btn.textContent = "Sending...";
+            
+            let clientIp = "Unknown";
+            try {
+                const ipRes = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipRes.json();
+                clientIp = ipData.ip;
+            } catch(e) { console.warn("IP fetch blocked"); }
+
+            const data = { type: document.getElementById('feedback-type').value, message: text, ip: clientIp, ...getDeviceMetadata() };
+            
+            try {
+                fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+                setTimeout(() => {
+                    feedbackStep = 3;
+                    renderFeedbackStep();
+                    btn.disabled = false;
+                }, 1000);
+            } catch (err) { btn.disabled = false; btn.textContent = "Submit Feedback"; }
+        }
         window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault();deferredPrompt=e});
-        function installPWA(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then((choice)=>{if(choice.outcome==='accepted')installBtn.style.display='none';deferredPrompt=null})}else{alert("Hey there! Whisper | Private Messaging can be installed using Chromium-based browsers like Brave, Edge, or Chrome. Please switch to one of these to continue.")}}
-        if(window.matchMedia('(display-mode: standalone)').matches){installBtn.style.display='none'}
-        window.addEventListener('appinstalled',()=>{installBtn.style.display='none'});
+        function installPWA(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then((choice)=>{if(choice.outcome==='accepted') hideInstallSlide(); deferredPrompt=null})}else{alert("Hey there! Whisper | Private Messaging can be installed using Chromium-based browsers like Brave, Edge, or Chrome. Please switch to one of these to continue.")}}
+        if(window.matchMedia('(display-mode: standalone)').matches){ hideInstallSlide(); }
+        window.addEventListener('appinstalled',()=>{ hideInstallSlide(); });
         document.addEventListener('contextmenu',event=>event.preventDefault());
         document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&['s','u','p'].includes(e.key.toLowerCase()))e.preventDefault();if(e.key==='F12')e.preventDefault();if((e.ctrlKey||e.metaKey)&&e.shiftKey&&['i','j','c'].includes(e.key.toLowerCase()))e.preventDefault();});
         window.onload=()=>{initPeer();const urlParams=new URLSearchParams(window.location.search);const code=urlParams.get('code');if(code)document.getElementById('peer-code-input').value=code}
