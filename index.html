@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -104,7 +102,7 @@
         @keyframes spin{100%{transform:rotate(360deg)}}
         .voice-active-area{display:none;width:100%;align-items:center;padding:0 15px;gap:15px;animation:fadeIn .2s ease}
         .voice-visualizer{flex:1;display:flex;align-items:center;gap:3px;height:30px}
-        .v-bar{width:2px;height:4px;background:var(--record-red);border-radius:2px;transition:height .05s ease}
+       .pb-bar{width:3px;height:4px;background:rgba(255,255,255,.4);border-radius:1.5px;transition:height .1s ease-out}
         .voice-timer{font-family:monospace;font-size:.85rem;color:var(--record-red);font-weight:600;min-width:45px}
         .voice-controls{display:flex;gap:10px}
         .v-btn{border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
@@ -132,9 +130,9 @@
         .input-wrapper{padding:10px 15px 35px 15px;background-color:var(--bg-color);z-index:60;position:relative}
         .input-container{background:#111;border-radius:40px;display:flex;align-items:center;border:1px solid #222;padding:2px;position:relative;animation:fluidRainbowShadow 10s linear infinite;height:56px;overflow:hidden;z-index:2}
         @keyframes fluidRainbowShadow{0%{box-shadow:0 4px 20px -5px rgba(255,0,0,.4)}50%{box-shadow:0 4px 20px -5px rgba(0,255,0,.4)}100%{box-shadow:0 4px 20px -5px rgba(255,0,255,.4)}}
-        #msg-input{flex:1;background:transparent;border:none;outline:none;color:white;padding:0 20px;font-size:1rem}
+        #msg-input{flex:1;min-width:0;background:transparent;border:none;outline:none;color:white;padding:0 20px;font-size:1rem}
         #peer-code-input{flex:1;background:transparent;border:none;outline:none;color:white;padding:16px;font-size:1rem;text-transform:uppercase;text-align:center}
-        .action-btn{background:transparent;border:none;color:#666;font-size:1.5rem;display:flex;align-items:center;justify-content:center;padding:0 15px;cursor:pointer}
+        .action-btn{background:transparent;border:none;color:#666;font-size:1.5rem;display:flex;align-items:center;justify-content:center;padding:0 15px;cursor:pointer;flex-shrink:0}
         .action-btn svg{width:22px;height:22px;fill:currentColor}
         #voice-trigger{color:var(--accent-blue)}
         footer{padding:10px 20px 30px 20px;text-align:center;font-size:.85rem;font-weight:400;color:#666;background:var(--bg-color)}
@@ -348,7 +346,7 @@
             .encryption-capsule { min-width: auto; }
             .voice-capsule { white-space: nowrap; width: max-content; }
             .video-capsule { 
-                top: calc(100% - 130px); 
+                top: calc(100% - 170px); 
                 transition: top 0.8s cubic-bezier(0.25, 1, 0.5, 1), padding 0.5s ease; 
             }
             .video-capsule.compact { 
@@ -1005,7 +1003,7 @@ function startCallTimer() {
         function markSent(){localUserSentMessage=true;suggestionContainer.style.display='none'}
         
         async function startRecording(){if(!conn?.open)return;try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});mediaRecorder=new MediaRecorder(stream);audioChunks=[];audioContext=new (window.AudioContext||window.webkitAudioContext)();const source=audioContext.createMediaStreamSource(stream);analyser=audioContext.createAnalyser();analyser.fftSize=64;source.connect(analyser);dataArray=new Uint8Array(analyser.frequencyBinCount);mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);mediaRecorder.onstop=()=>{const audioBlob=new Blob(audioChunks,{type:'audio/webm'});const reader=new FileReader();reader.onload=()=>{conn.send('WHISPER_AUD_'+reader.result);appendAudioMessage(reader.result,'sent')};reader.readAsDataURL(audioBlob);stream.getTracks().forEach(t=>t.stop())};mediaRecorder.start();startTime=Date.now();normalMode.style.display='none';voiceMode.style.display='flex';recordInterval=setInterval(()=>{const elapsed=(Date.now()-startTime)/1000;timerDisplay.textContent=`${Math.floor(elapsed/60)}:${Math.floor(elapsed%60).toString().padStart(2,'0')}`;if(elapsed>=60)stopRecording(true)},100);animateVisualizer()}catch(err){}}
-        function animateVisualizer(){if(!analyser)return;animationFrame=requestAnimationFrame(animateVisualizer);analyser.getByteFrequencyData(dataArray);const bars=document.querySelectorAll('.v-bar');bars.forEach((bar,i)=>{const val=dataArray[i%dataArray.length];bar.style.height=`${Math.max(4,(val/255)*26)}px`})}
+        function animateVisualizer(){if(!analyser)return;animationFrame=requestAnimationFrame(animateVisualizer);analyser.getByteFrequencyData(dataArray);const bars=document.querySelectorAll('.v-bar');bars.forEach((bar,i)=>{const index=Math.floor((i/bars.length)*(dataArray.length/2));const val=dataArray[index];bar.style.height=`${Math.max(4,(val/255)*26)}px`})}
         function stopRecording(send){normalMode.style.display='flex';voiceMode.style.display='none';clearInterval(recordInterval);cancelAnimationFrame(animationFrame);if(audioContext)audioContext.close();if(mediaRecorder&&mediaRecorder.state!=='inactive'){if(send)mediaRecorder.stop();else{mediaRecorder.onstop=null;mediaRecorder.stop();mediaRecorder.stream.getTracks().forEach(t=>t.stop())}}}
         
         function appendAudioMessage(src,sender){
@@ -1025,8 +1023,8 @@ function startCallTimer() {
             const formatTime=time=>{const m=Math.floor(time/60),s=Math.floor(time%60).toString().padStart(2,'0');return`${m}:${s}`};
             audio.onloadedmetadata=()=>{ const totalDur=isNaN(audio.duration)?0:audio.duration; durationSpan.textContent=`0:00 / ${formatTime(totalDur)}`; };
             audio.ontimeupdate=()=>{ const current=formatTime(audio.currentTime),total=formatTime(audio.duration||0); durationSpan.textContent=`${current} / ${total}`; };
-            audio.onended=()=>{ playBtn.innerHTML='▶'; const total=formatTime(audio.duration||0); durationSpan.textContent=`0:00 / ${total}`; };
-            playBtn.onclick=()=>{if(audio.paused){audio.play();playBtn.innerHTML='⏸'}else{audio.pause();playBtn.innerHTML='▶'}};
+           audio.onended=()=>{ playBtn.innerHTML='▶'; const total=formatTime(audio.duration||0); durationSpan.textContent=`0:00 / ${total}`; viz.querySelectorAll('.pb-bar').forEach(b=>b.style.height='4px'); };
+            playBtn.onclick=()=>{if(audio.paused){if(!window.sharedPlaybackCtx)window.sharedPlaybackCtx=new (window.AudioContext||window.webkitAudioContext)();if(window.sharedPlaybackCtx.state==='suspended')window.sharedPlaybackCtx.resume();if(!audio.sourceNode){try{audio.sourceNode=window.sharedPlaybackCtx.createMediaElementSource(audio);audio.analyser=window.sharedPlaybackCtx.createAnalyser();audio.analyser.fftSize=64;audio.sourceNode.connect(audio.analyser);audio.analyser.connect(window.sharedPlaybackCtx.destination);audio.dataArray=new Uint8Array(audio.analyser.frequencyBinCount);}catch(e){}}audio.play();playBtn.innerHTML='⏸';const drawViz=()=>{if(audio.paused)return;if(audio.analyser){audio.analyser.getByteFrequencyData(audio.dataArray);const bars=viz.querySelectorAll('.pb-bar');bars.forEach((b,i)=>{const idx=Math.floor((i/bars.length)*(audio.dataArray.length/2));const val=audio.dataArray[idx];b.style.height=`${Math.max(4,(val/255)*20)}px`;});}requestAnimationFrame(drawViz);};requestAnimationFrame(drawViz);}else{audio.pause();playBtn.innerHTML='▶';}};
             container.appendChild(playBtn);
             container.appendChild(viz);
             container.appendChild(durationSpan);
