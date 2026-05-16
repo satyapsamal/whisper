@@ -98,6 +98,10 @@
         #remote-video, #local-video {
             filter: brightness(1.05) contrast(1.05) saturate(1.1);
         }
+        #screenshare-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); display:none; flex-direction:column; align-items:center; justify-content:center; z-index:400; backdrop-filter:blur(15px); }
+        .screenshare-container { width: 90%; max-width: 1000px; aspect-ratio: 16/9; border-radius: 12px; background: #111; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: box-shadow 0.1s ease-out, border-color 0.1s ease-out; }
+        #screenshare-video { width: 100%; height: 100%; object-fit: contain; }
+        .screenshare-controls { position:absolute; bottom:30px; left:50%; transform:translateX(-50%); display:flex; gap:20px; z-index:10; background:rgba(0,0,0,0.6); padding:10px 20px; border-radius:40px; backdrop-filter:blur(10px); }
 
         .spinner{display:none;width:24px;height:24px;border:3px solid #333;border-top:3px solid #fff;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}
         @keyframes spin{100%{transform:rotate(360deg)}}
@@ -346,10 +350,13 @@
         @media (max-width: 768px) {
             .encryption-capsule { min-width: auto; }
             .voice-capsule { white-space: nowrap; width: max-content; }
-            .video-capsule { 
+.video-capsule, .screenshare-capsule { 
                 top: calc(100% - 170px); 
                 transition: top 0.8s cubic-bezier(0.25, 1, 0.5, 1), padding 0.5s ease; 
             }
+            .screenshare-capsule.compact { top: 30px; padding: 8px 16px; }
+            .screenshare-capsule.compact .capsule-label { max-width: 0; opacity: 0; margin-left: -6px; pointer-events: none; }
+            .screenshare-container { width: 100%; border-radius: 0; border-left: none; border-right: none; aspect-ratio: auto; flex: 1; margin: 80px 0; }
             .video-capsule.compact { 
                 top: 30px; 
                 padding: 8px 16px; 
@@ -433,7 +440,28 @@
                 <button class="call-action-btn btn-hangup" onclick="endCall(false)">
                     <svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg>
                 </button>
-            </div>
+           </div>
+        </div>
+    </div>
+
+    <div id="screenshare-overlay">
+        <div class="encryption-capsule screenshare-capsule">
+            <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/></svg>
+            <span class="capsule-label">End-to-End Encrypted |&nbsp;</span><span class="call-timer-display">0:00</span>
+        </div>
+        <div class="screenshare-container" id="screenshare-container">
+            <video id="screenshare-video" autoplay playsinline></video>
+        </div>
+        <div class="screenshare-controls">
+            <button class="call-action-btn btn-mute-mic" onclick="toggleMute()" style="background:#333;">
+                <svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+            </button>
+            <button class="call-action-btn btn-screenshare" onclick="toggleScreenShare()" style="background:var(--accent-blue);">
+                <svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M21 3H3c-1.11 0-2 .89-2 2v12c0 1.1.89 2 2 2h5v2h8v-2h5c1.1 0 2-.9 2-2V5c0-1.11-.9-2-2-2zm0 14H3V5h18v12z"/></svg>
+            </button>
+            <button class="call-action-btn btn-hangup" onclick="endCall(false)">
+                <svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg>
+            </button>
         </div>
     </div>
 
@@ -938,7 +966,7 @@
         async function acceptIncomingVideoCall(){try{isVideoCall=true;currentFacingMode='user';localVideo.classList.add('mirror');const videoConstraints={facingMode:currentFacingMode,width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}};localStream=await navigator.mediaDevices.getUserMedia({audio:getAudioConstraints(),video:videoConstraints});localVideo.srcObject=localStream;currentCall.answer(localStream);setTimeout(()=>applyAdaptiveQoS(currentCall),1000);callOverlay.style.display='none';videoCallOverlay.style.display='flex';showAIPopup();setCallTitle();currentCall.on('stream',(remoteStream)=>{startCallTimer();remoteVideo.srcObject=remoteStream;remoteVideo.play().catch(e=>console.warn(e));currentCall.peerConnection.addEventListener('iceconnectionstatechange',()=>{if(currentCall&&['disconnected','failed','closed'].includes(currentCall.peerConnection.iceConnectionState))endCall(true);}); const isMobile = window.innerWidth <= 768; const videoCapsule = document.querySelector('.video-capsule'); if (isMobile && videoCapsule) { videoCapsule.classList.remove('compact'); if (mobileCapsuleTimer) clearTimeout(mobileCapsuleTimer); mobileCapsuleTimer = setTimeout(() => { videoCapsule.classList.add('compact'); }, 5000); }});currentCall.on('close',()=>endCall(true))}catch(err){endCall(false)}}
         
         function setupRippleFeedback(stream){if(callAnimFrame)cancelAnimationFrame(callAnimFrame);if(callAudioCtx){try{callAudioCtx.close()}catch(e){}}callAudioCtx=new (window.AudioContext||window.webkitAudioContext)();const source=callAudioCtx.createMediaStreamSource(stream);callAnalyser=callAudioCtx.createAnalyser();callAnalyser.fftSize=64;source.connect(callAnalyser);callDataArray=new Uint8Array(callAnalyser.frequencyBinCount);animateRipples()}
-        function animateRipples(){callAnimFrame=requestAnimationFrame(animateRipples);callAnalyser.getByteFrequencyData(callDataArray);let sum=0;for(let i=0;i<callDataArray.length;i++)sum+=callDataArray[i];const volume=sum/callDataArray.length;const scale=volume/128;const ripple1=document.getElementById('ripple-1'),ripple2=document.getElementById('ripple-2'),ripple3=document.getElementById('ripple-3');if(scale>0.05){ripple1.style.opacity=0.8;ripple1.style.transform=`scale(${1+scale*0.8})`;ripple2.style.opacity=0.5;ripple2.style.transform=`scale(${1+scale*1.5})`;ripple3.style.opacity=0.3;ripple3.style.transform=`scale(${1+scale*2.2})`}else{[ripple1,ripple2,ripple3].forEach(r=>{r.style.opacity=0;r.style.transform='scale(1)'})}}
+        function animateRipples(){callAnimFrame=requestAnimationFrame(animateRipples);callAnalyser.getByteFrequencyData(callDataArray);let sum=0;for(let i=0;i<callDataArray.length;i++)sum+=callDataArray[i];const volume=sum/callDataArray.length;const scale=volume/128;const ripple1=document.getElementById('ripple-1'),ripple2=document.getElementById('ripple-2'),ripple3=document.getElementById('ripple-3');if(scale>0.05){ripple1.style.opacity=0.8;ripple1.style.transform=`scale(${1+scale*0.8})`;ripple2.style.opacity=0.5;ripple2.style.transform=`scale(${1+scale*1.5})`;ripple3.style.opacity=0.3;ripple3.style.transform=`scale(${1+scale*2.2})`;const sc=document.getElementById('screenshare-container');if(sc&&sc.offsetParent!==null){sc.style.boxShadow=`0 0 ${20+scale*60}px rgba(0,122,255,${0.3+scale*0.5})`;sc.style.borderColor=`rgba(0,122,255,${0.5+scale*0.5})`;}}else{[ripple1,ripple2,ripple3].forEach(r=>{r.style.opacity=0;r.style.transform='scale(1)'});const sc=document.getElementById('screenshare-container');if(sc){sc.style.boxShadow='0 10px 30px rgba(0,0,0,0.5)';sc.style.borderColor='rgba(255,255,255,0.1)';}}}
         
         function toggleMute(){if(localStream){const audioTrack=localStream.getAudioTracks()[0];if(audioTrack){audioTrack.enabled=!audioTrack.enabled;isAudioMuted=!audioTrack.enabled;const muteBtns=document.querySelectorAll('.btn-mute-mic');muteBtns.forEach(btn=>{if(isAudioMuted){btn.style.background='var(--record-red)';btn.innerHTML='<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M19 11h-1.7c0 .74-.16 1.43-.43 2.05l1.23 1.23c.56-.98.9-2.09.9-3.28zm-4.02.17c0-.06.02-.11.02-.17V5c0-1.66-1.34-3-3-3S9 3.34 9 5v.18l5.98 5.99zM4.27 3L3 4.27l6 6V11c0 1.66 1.33 3 2.99 3 .22 0 .44-.03.65-.08l1.66 1.66c-.71.33-1.5.52-2.31.52-2.76 0-5.3-2.1-5.3-5.1H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c.91-.13 1.77-.45 2.54-.9L19.73 21 21 19.73 4.27 3z"/></svg>';}else{btn.style.background='#333';btn.innerHTML='<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>';}});}}}
         
@@ -989,11 +1017,14 @@
                 }
                 
                 callOverlay.style.display = 'none';
-                videoCallOverlay.style.display = 'flex';
-                localVideo.srcObject = screenStream;
-                localVideo.classList.remove('mirror');
+                document.getElementById('screenshare-overlay').style.display = 'flex';
+                document.getElementById('screenshare-video').srcObject = screenStream;
                 isScreenSharing = true;
                 
+                const isMob = window.innerWidth <= 768;
+                const scCap = document.querySelector('.screenshare-capsule');
+                if (isMob && scCap) { scCap.classList.remove('compact'); if (mobileCapsuleTimer) clearTimeout(mobileCapsuleTimer); mobileCapsuleTimer = setTimeout(() => { scCap.classList.add('compact'); }, 5000); }
+
                 videoTrack.onended = () => stopScreenShare();
                 conn.send('WHISPER_SCREENSHARE_START');
                 document.querySelectorAll('.btn-screenshare').forEach(btn => btn.style.background = 'var(--accent-blue)');
@@ -1009,15 +1040,15 @@
                 if (videoSender) videoSender.replaceTrack(null).catch(e=>{});
             }
             isScreenSharing = false;
-            if (!force) {
-                videoCallOverlay.style.display = 'none';
+if (!force) {
+                document.getElementById('screenshare-overlay').style.display = 'none';
                 callOverlay.style.display = 'flex';
                 conn.send('WHISPER_SCREENSHARE_STOP');
                 document.querySelectorAll('.btn-screenshare').forEach(btn => btn.style.background = '#333');
             }
         }
         
-        function endCall(isRemote=false){if(typeof stopScreenShare==='function')stopScreenShare(true);stopCallTimer();if(mobileCapsuleTimer)clearTimeout(mobileCapsuleTimer); const vc = document.querySelector('.video-capsule'); if(vc) vc.classList.remove('compact'); if(callTimeoutTimer)clearTimeout(callTimeoutTimer);if(!isRemote&&conn&&conn.open)conn.send('WHISPER_CALL_TERMINATED');if(currentCall)currentCall.close();if(localStream){localStream.getTracks().forEach(t=>t.stop());localStream=null}if(callAnimFrame)cancelAnimationFrame(callAnimFrame);if(callAudioCtx){try{callAudioCtx.close()}catch(e){}}if(remoteAudioObj){remoteAudioObj.pause();remoteAudioObj.srcObject=null;remoteAudioObj=null;}callOverlay.style.display='none';videoCallOverlay.style.display='none';document.getElementById('ai-enhance-popup').style.display='none';if(aiPopupTimer)clearTimeout(aiPopupTimer);remoteVideo.srcObject=null;localVideo.srcObject=null;isVideoCall=false;isAudioMuted=false;const muteBtns=document.querySelectorAll('.btn-mute-mic');muteBtns.forEach(btn=>{btn.style.background='#333';btn.innerHTML='<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>';});currentCall=null;const lastMsg=chatContainer.lastElementChild;if(lastMsg&&lastMsg.textContent!=="Private call has ended."&&lastMsg.textContent!=="Call unanswered")appendMessage("The private call has ended.",'system');stopFlasher();updateTitle()}
+        function endCall(isRemote=false){if(typeof stopScreenShare==='function')stopScreenShare(true);stopCallTimer();if(mobileCapsuleTimer)clearTimeout(mobileCapsuleTimer); const vc = document.querySelector('.video-capsule'); if(vc) vc.classList.remove('compact'); const scCap = document.querySelector('.screenshare-capsule'); if(scCap) scCap.classList.remove('compact'); if(callTimeoutTimer)clearTimeout(callTimeoutTimer);if(!isRemote&&conn&&conn.open)conn.send('WHISPER_CALL_TERMINATED');if(currentCall)currentCall.close();if(localStream){localStream.getTracks().forEach(t=>t.stop());localStream=null}if(callAnimFrame)cancelAnimationFrame(callAnimFrame);if(callAudioCtx){try{callAudioCtx.close()}catch(e){}}if(remoteAudioObj){remoteAudioObj.pause();remoteAudioObj.srcObject=null;remoteAudioObj=null;}callOverlay.style.display='none';videoCallOverlay.style.display='none';document.getElementById('screenshare-overlay').style.display='none';document.getElementById('ai-enhance-popup').style.display='none';if(aiPopupTimer)clearTimeout(aiPopupTimer);remoteVideo.srcObject=null;localVideo.srcObject=null;document.getElementById('screenshare-video').srcObject=null;isVideoCall=false;isAudioMuted=false;const muteBtns=document.querySelectorAll('.btn-mute-mic');muteBtns.forEach(btn=>{btn.style.background='#333';btn.innerHTML='<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>';});currentCall=null;const lastMsg=chatContainer.lastElementChild;if(lastMsg&&lastMsg.textContent!=="Private call has ended."&&lastMsg.textContent!=="Call unanswered")appendMessage("The private call has ended.",'system');stopFlasher();updateTitle()}
         
         function showCallOverlay(status){callStatus.textContent=status;callOverlay.style.display='flex'}
         function renderCallControls(actions){callControls.innerHTML='';actions.forEach(act=>{const b=document.createElement('button');b.className=`call-action-btn ${act.class}`;b.innerHTML=act.label;if(act.bg)b.style.background=act.bg;b.onclick=act.action;callControls.appendChild(b)})}
@@ -1032,9 +1063,8 @@
             if(data==='WHISPER_TYPING_ON'){showTypingIndicator(true);return}
             if(data==='WHISPER_TYPING_OFF'){showTypingIndicator(false);return}
         if(data==='WHISPER_SCREENSHOT'){showScreenshotNotification();return}
-            if(data==='WHISPER_SCREENSHARE_START'){callOverlay.style.display='none';videoCallOverlay.style.display='flex';if(currentCall&&currentCall.remoteStream){remoteVideo.srcObject=currentCall.remoteStream;remoteVideo.play().catch(e=>{});}document.querySelectorAll('.btn-screenshare').forEach(btn=>{btn.style.pointerEvents='none';btn.style.opacity='0.5'});return;}
-            if(data==='WHISPER_SCREENSHARE_STOP'){videoCallOverlay.style.display='none';callOverlay.style.display='flex';document.querySelectorAll('.btn-screenshare').forEach(btn=>{btn.style.pointerEvents='auto';btn.style.opacity='1'});return;}
-            showTypingIndicator(false);
+            if(data==='WHISPER_SCREENSHARE_START'){callOverlay.style.display='none';document.getElementById('screenshare-overlay').style.display='flex';if(currentCall&&currentCall.remoteStream){const sv = document.getElementById('screenshare-video'); sv.srcObject=currentCall.remoteStream;sv.play().catch(e=>{});}document.querySelectorAll('.btn-screenshare').forEach(btn=>{btn.style.pointerEvents='none';btn.style.opacity='0.5'}); const isMob = window.innerWidth <= 768; const scCap = document.querySelector('.screenshare-capsule'); if (isMob && scCap) { scCap.classList.remove('compact'); if (mobileCapsuleTimer) clearTimeout(mobileCapsuleTimer); mobileCapsuleTimer = setTimeout(() => { scCap.classList.add('compact'); }, 5000); } return;}
+            if(data==='WHISPER_SCREENSHARE_STOP'){document.getElementById('screenshare-overlay').style.display='none';callOverlay.style.display='flex';document.querySelectorAll('.btn-screenshare').forEach(btn=>{btn.style.pointerEvents='auto';btn.style.opacity='1'});return;}
             if(typeof data==='string'){
                 if(data.startsWith('WHISPER_MEDIA_START|')){
                     const parts=data.split('|');
