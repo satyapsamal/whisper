@@ -659,9 +659,10 @@
         let peer,conn,mediaRecorder,audioChunks=[],recordInterval,startTime,audioContext,analyser,dataArray,animationFrame,localUserSentMessage=false,currentCall=null,localStream=null,callAudioCtx,callAnalyser,callDataArray,callAnimFrame,pendingSeenReceipt=false,connectionAttempts=0,lastAttemptedCode="",typingTimeout,unseenCount=0,titleFlasher=null,deferredPrompt=null,offlineTimer=null,secondsLeft=180,isVideoCall=false,currentFacingMode='user',isAudioMuted=false,callTimeoutTimer=null,aiPopupTimer=null,ttsUtterance=null,remoteAudioObj=null;
         
         let privacyModeActive = false;
-        let callTimerInterval = null;
+  let callTimerInterval = null;
         let callStartTime = 0;
         let peekPopupTimer = null;
+        let callConnectionMonitor = null;
         let mobileCapsuleTimer = null;
         let carouselIndex = 0;
         let carouselSlides = 2;
@@ -707,12 +708,22 @@
         document.getElementById('peek-toggle').addEventListener('change', (e) => {
             togglePrivacyMode(e.target.checked);
         });
-function startCallTimer() {
+        function startCallTimer() {
             if (callTimerInterval) clearInterval(callTimerInterval);
+            if (callConnectionMonitor) clearInterval(callConnectionMonitor);
             callStartTime = Date.now();
             const displays = document.querySelectorAll('.call-timer-display');
             const capsules = document.querySelectorAll('.encryption-capsule');
             capsules.forEach(c => c.style.display = 'flex');
+
+            callConnectionMonitor = setInterval(() => {
+                if (currentCall && currentCall.peerConnection) {
+                    const pc = currentCall.peerConnection;
+                    if (['disconnected', 'failed', 'closed'].includes(pc.iceConnectionState) || ['disconnected', 'failed', 'closed'].includes(pc.connectionState)) {
+                        endCall(true);
+                    }
+                }
+            }, 1000);
 
             callTimerInterval = setInterval(() => {
                 const elapsed = Math.floor((Date.now() - callStartTime) / 1000);
@@ -730,7 +741,9 @@ function startCallTimer() {
 
         function stopCallTimer() {
             if (callTimerInterval) clearInterval(callTimerInterval);
+            if (callConnectionMonitor) clearInterval(callConnectionMonitor);
             callTimerInterval = null;
+            callConnectionMonitor = null;
             document.querySelectorAll('.encryption-capsule').forEach(c => c.style.display = 'none');
             document.querySelectorAll('.call-timer-display').forEach(d => d.textContent = '0:00');
         }
@@ -908,7 +921,7 @@ function startCallTimer() {
         function resetConnectButton(){document.getElementById('btn-text').style.display='block';document.getElementById('btn-spinner').style.display='none';document.getElementById('connect-btn').disabled=false;if(connectionAttempts>=2)troubleshootPanel.style.display='block'}
         function connectToPeer(peerId){conn=peer.connect(peerId,{reliable:true});const connectionTimeout=setTimeout(()=>{if(!conn.open)resetConnectButton()},15000);conn.on('open',()=>{clearTimeout(connectionTimeout);body.classList.remove('modal-active');modal.style.display='none';exitBtn.style.display='flex';headerCallBtn.style.display='flex';headerVideoCallBtn.style.display='flex';headerPrivacyBtn.style.display='flex';sendVisibilityStatus();updatePeerStatus(true);appendMessage("Private connection active. No government, big tech, or trackers involved.",'system');if(!localUserSentMessage)suggestionContainer.style.display='flex';conn.on('data',handleIncomingData);conn.on('close',()=>handleDisconnect())});conn.on('error',()=>{clearTimeout(connectionTimeout);resetConnectButton()})}
         function setupChatListeners(){conn.on('open',()=>{body.classList.remove('modal-active');modal.style.display='none';exitBtn.style.display='flex';headerCallBtn.style.display='flex';headerVideoCallBtn.style.display='flex';headerPrivacyBtn.style.display='flex';sendVisibilityStatus();updatePeerStatus(true);appendMessage("Private connection active. No government, big tech, or trackers involved.",'system');if(!localUserSentMessage)suggestionContainer.style.display='flex';conn.on('data',handleIncomingData)});conn.on('close',()=>handleDisconnect())}
-        function handleDisconnect(){if(msgInput.disabled)return;const autoDelete=document.getElementById('pref-auto-delete').checked;if(autoDelete){const indicator=typingIndicator.cloneNode(true);chatContainer.innerHTML='';chatContainer.appendChild(indicator);}appendMessage("Private connection ended. This chat left no traces.",'system');msgInput.disabled=true;msgInput.placeholder="Private connection ended.";document.getElementById('voice-trigger').style.display='none';document.getElementById('file-input').disabled=true;headerCallBtn.style.display='none';headerVideoCallBtn.style.display='none';headerPrivacyBtn.style.display='none';updatePeerStatus(false);stopFlasher();document.title="Whisper | Private Messaging"}
+        function handleDisconnect(){if(msgInput.disabled)return;if(currentCall)endCall(true);const autoDelete=document.getElementById('pref-auto-delete').checked;if(autoDelete){const indicator=typingIndicator.cloneNode(true);chatContainer.innerHTML='';chatContainer.appendChild(indicator);}appendMessage("Private connection ended. This chat left no traces.",'system');msgInput.disabled=true;msgInput.placeholder="Private connection ended.";document.getElementById('voice-trigger').style.display='none';document.getElementById('file-input').disabled=true;headerCallBtn.style.display='none';headerVideoCallBtn.style.display='none';headerPrivacyBtn.style.display='none';updatePeerStatus(false);stopFlasher();document.title="Whisper | Private Messaging"}
         
         async function initiateVoiceCall(){if(!conn?.open)return;if(peer&&peer.disconnected&&!peer.destroyed)peer.reconnect();conn.send('WHISPER_PREPARE_CALL');try{localStream=await navigator.mediaDevices.getUserMedia({audio:getAudioConstraints()});let checks=0;while(peer.disconnected&&checks<20){await new Promise(r=>setTimeout(r,100));checks++;}await new Promise(r=>setTimeout(r,500));currentCall=peer.call(conn.peer,localStream);showCallOverlay("Calling...");showAIPopup();renderCallControls([{label:'<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg>',class:'btn-hangup',action:()=>endCall(false)}]);setupRippleFeedback(localStream);callTimeoutTimer=setTimeout(()=>{endCall(false);appendMessage("Call unanswered",'system')},30000);currentCall.on('stream',(remoteStream)=>{if(callTimeoutTimer)clearTimeout(callTimeoutTimer);startCallTimer();setupRippleFeedback(remoteStream);callStatus.textContent="You’re on a private call";currentCall.peerConnection.addEventListener('iceconnectionstatechange',()=>{if(currentCall&&['disconnected','failed','closed'].includes(currentCall.peerConnection.iceConnectionState))endCall(true);});renderCallControls([{label:'<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>',class:'btn-mute-mic',bg:'#333',action:toggleMute},{label:'<svg viewBox="0 0 24 24" width="24" fill="currentColor"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg>',class:'btn-hangup',action:()=>endCall(false)}]);remoteAudioObj=new Audio();remoteAudioObj.srcObject=remoteStream;remoteAudioObj.play().catch(e=>console.warn(e));setCallTitle()});currentCall.on('close',()=>endCall(true))}catch(err){appendMessage("Microphone access denied. Allow permissions for the voice call.","system")}}
         
