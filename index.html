@@ -383,13 +383,15 @@
             }
         }
         }
-     /* Privacy Mode Overrides */
-        body.privacy-mode-active .message:not(.system) .text-content {
-            filter: blur(6px) !important;
-            opacity: 0.4 !important;
+     body.privacy-mode-active .message:not(.system) .text-content {
+            color: transparent !important;
+            text-shadow: none !important;
+            background-color: rgba(255, 255, 255, 0.15) !important;
+            border-radius: 4px !important;
             pointer-events: none !important;
             user-select: none !important;
             -webkit-user-select: none !important;
+            filter: none !important;
         }
         body.privacy-mode-active .msg-meta {
             display: none !important;
@@ -408,6 +410,34 @@
         }
         body.privacy-mode-active .media-content {
             filter: blur(25px) !important;
+        }
+        .msg-quote {
+            font-size: 0.75rem;
+            background: rgba(0,0,0,0.25);
+            padding: 6px 10px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            border-left: 3px solid var(--accent-blue);
+            opacity: 0.85;
+            cursor: pointer;
+        }
+        .quote-sender {
+            font-weight: 600;
+            color: var(--accent-blue);
+            margin-bottom: 2px;
+        }
+        .quote-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px;
+        }
+        body.privacy-mode-active .quote-text {
+            color: transparent !important;
+            text-shadow: none !important;
+            background-color: rgba(255, 255, 255, 0.15) !important;
+            border-radius: 4px !important;
+            user-select: none !important;
         }
     </style>
 </head>
@@ -678,6 +708,12 @@
         </div>  
 
         <div id="suggestion-container"><button id="hello-suggestion" onclick="sendHello()">Say hello 👋</button></div>
+
+        <div id="reply-preview-container" style="display:none; padding: 10px 15px; background: #111; border-radius: 16px; margin-bottom: 10px; border-left: 4px solid var(--accent-blue); border: 1px solid #222; position: relative; font-size: 0.8rem; z-index: 2; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+            <div style="font-weight: 600; color: var(--accent-blue); margin-bottom: 3px;" id="reply-sender"></div>
+            <div style="color: #ccc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 35px;" id="reply-content"></div>
+            <button onclick="cancelReply()" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: #222; border: none; color: #aaa; font-size: 0.9rem; cursor: pointer; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;">✕</button>
+        </div>
 
         <div class="input-container" id="input-container">
             <div id="normal-input-mode" style="display:flex;width:100%;align-items:center">
@@ -1013,7 +1049,58 @@
             } catch (err) { console.error("Camera switch failed", err); }
         }
 
-    let isScreenSharing = false;
+    let replyingTo = null;
+        let currentQuote = null;
+
+        function showReplyPreview() {
+            if(!replyingTo) return;
+            document.getElementById('reply-sender').textContent = replyingTo.sender === 'You' ? 'Replying to yourself' : 'Replying to Peer';
+            document.getElementById('reply-content').textContent = replyingTo.content;
+            document.getElementById('reply-preview-container').style.display = 'block';
+            msgInput.focus();
+        }
+
+        function cancelReply() {
+            replyingTo = null;
+            document.getElementById('reply-preview-container').style.display = 'none';
+        }
+
+        function createQuoteElement(quote) {
+            if(!quote) return null;
+            const qDiv = document.createElement('div');
+            qDiv.className = 'msg-quote';
+            qDiv.innerHTML = `<div class="quote-sender">${quote.sender}</div><div class="quote-text">${quote.content}</div>`;
+            return qDiv;
+        }
+
+        function setupReplyListener(msgDiv) {
+            if(msgDiv.classList.contains('system')) return;
+            msgDiv.addEventListener('click', (e) => {
+                if(window.getSelection().toString().length > 0) return;
+                if(e.target.tagName === 'BUTTON' || e.target.closest('.media-container') || e.target.closest('.audio-bubble button') || e.target.closest('.msg-quote')) return;
+                
+                let qType = 'text';
+                let qContent = '';
+                if(msgDiv.querySelector('.text-content')) {
+                    qContent = msgDiv.querySelector('.text-content').textContent;
+                } else if (msgDiv.querySelector('.media-content')) {
+                    qType = msgDiv.querySelector('.media-content').tagName.toLowerCase() === 'img' ? 'image' : 'video';
+                    qContent = qType === 'image' ? '📷 Photo' : '🎥 Video';
+                } else if (msgDiv.querySelector('.audio-bubble')) {
+                    qType = 'audio';
+                    qContent = '🎤 Voice Message';
+                }
+                
+                replyingTo = {
+                    sender: msgDiv.classList.contains('sent') ? 'You' : 'Peer',
+                    type: qType,
+                    content: qContent.length > 60 ? qContent.substring(0, 60) + '...' : qContent
+                };
+                showReplyPreview();
+            });
+        }
+        let isScreenSharing = false;
+
         let remoteIsScreenSharing = false;
         let screenStream = null;
 
@@ -1113,7 +1200,14 @@ if (!force) {
         function showCallOverlay(status){callStatus.textContent=status;callOverlay.style.display='flex'}
         function renderCallControls(actions){callControls.innerHTML='';actions.forEach(act=>{const b=document.createElement('button');b.className=`call-action-btn ${act.class}`;b.innerHTML=act.label;if(act.bg)b.style.background=act.bg;b.onclick=act.action;callControls.appendChild(b)})}
         
-        function handleIncomingData(data){
+       function handleIncomingData(data){
+            if(typeof data==='string' && data.startsWith('WHISPER_REPLY|')){
+                const splitIdx = data.indexOf('|', 14);
+                if(splitIdx !== -1) {
+                    try { currentQuote = JSON.parse(decodeURIComponent(escape(atob(data.substring(14, splitIdx))))); } catch(e){}
+                    data = data.substring(splitIdx + 1);
+                }
+            }
             if(data==='WHISPER_PREPARE_CALL'){if(peer&&peer.disconnected&&!peer.destroyed){peer.reconnect()}return}
             if(data==='WHISPER_EXIT'){handleDisconnect();return}
             if(data==='WHISPER_STATUS_ONLINE'){updatePeerStatus(true);return}
@@ -1162,7 +1256,7 @@ if (!force) {
         function sendHello(){if(!conn?.open)return;conn.send("Hello 👋");appendMessage("Hello 👋",'sent')}
         function markSent(){localUserSentMessage=true;suggestionContainer.style.display='none'}
         
-        async function startRecording(){if(!conn?.open)return;try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});mediaRecorder=new MediaRecorder(stream);audioChunks=[];audioContext=new (window.AudioContext||window.webkitAudioContext)();const source=audioContext.createMediaStreamSource(stream);analyser=audioContext.createAnalyser();analyser.fftSize=64;source.connect(analyser);dataArray=new Uint8Array(analyser.frequencyBinCount);mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);mediaRecorder.onstop=()=>{const audioBlob=new Blob(audioChunks,{type:'audio/webm'});const reader=new FileReader();reader.onload=()=>{conn.send('WHISPER_AUD_'+reader.result);appendAudioMessage(reader.result,'sent')};reader.readAsDataURL(audioBlob);stream.getTracks().forEach(t=>t.stop())};mediaRecorder.start();startTime=Date.now();normalMode.style.display='none';voiceMode.style.display='flex';recordInterval=setInterval(()=>{const elapsed=(Date.now()-startTime)/1000;timerDisplay.textContent=`${Math.floor(elapsed/60)}:${Math.floor(elapsed%60).toString().padStart(2,'0')}`;if(elapsed>=60)stopRecording(true)},100);animateVisualizer()}catch(err){}}
+        async function startRecording(){if(!conn?.open)return;try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});mediaRecorder=new MediaRecorder(stream);audioChunks=[];audioContext=new (window.AudioContext||window.webkitAudioContext)();const source=audioContext.createMediaStreamSource(stream);analyser=audioContext.createAnalyser();analyser.fftSize=64;source.connect(analyser);dataArray=new Uint8Array(analyser.frequencyBinCount);mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);mediaRecorder.onstop=()=>{const audioBlob=new Blob(audioChunks,{type:'audio/webm'});const reader=new FileReader();reader.onload=()=>{let payload = 'WHISPER_AUD_'+reader.result; if(replyingTo) { currentQuote = replyingTo; payload = 'WHISPER_REPLY|' + btoa(unescape(encodeURIComponent(JSON.stringify(replyingTo)))) + '|' + payload; } conn.send(payload);appendAudioMessage(reader.result,'sent');cancelReply();};reader.readAsDataURL(audioBlob);stream.getTracks().forEach(t=>t.stop())};mediaRecorder.start();startTime=Date.now();normalMode.style.display='none';voiceMode.style.display='flex';recordInterval=setInterval(()=>{const elapsed=(Date.now()-startTime)/1000;timerDisplay.textContent=`${Math.floor(elapsed/60)}:${Math.floor(elapsed%60).toString().padStart(2,'0')}`;if(elapsed>=60)stopRecording(true)},100);animateVisualizer()}catch(err){}}
         function animateVisualizer(){if(!analyser)return;animationFrame=requestAnimationFrame(animateVisualizer);analyser.getByteFrequencyData(dataArray);const bars=document.querySelectorAll('.v-bar');bars.forEach((bar,i)=>{const index=Math.floor((i/bars.length)*(dataArray.length/2));const val=dataArray[index];bar.style.height=`${Math.max(4,(val/255)*26)}px`})}
         function stopRecording(send){normalMode.style.display='flex';voiceMode.style.display='none';clearInterval(recordInterval);cancelAnimationFrame(animationFrame);if(audioContext)audioContext.close();if(mediaRecorder&&mediaRecorder.state!=='inactive'){if(send)mediaRecorder.stop();else{mediaRecorder.onstop=null;mediaRecorder.stop();mediaRecorder.stream.getTracks().forEach(t=>t.stop())}}}
         
@@ -1170,6 +1264,10 @@ if (!force) {
             if(sender==='sent')markSent();
             const msgDiv=document.createElement('div');
             msgDiv.className=`message ${sender}`;
+            
+            let quoteEl = null;
+            if(currentQuote) { quoteEl = createQuoteElement(currentQuote); currentQuote = null; }
+            if(quoteEl) msgDiv.appendChild(quoteEl);
             const container=document.createElement('div');
             container.className='audio-bubble';
             const playBtn=document.createElement('button');
@@ -1191,9 +1289,10 @@ if (!force) {
             msgDiv.appendChild(container);
             msgDiv.appendChild(createMetaElement(sender==='sent'));
             const indicator=document.getElementById('typing-indicator');
-            if(indicator)chatContainer.insertBefore(msgDiv,indicator);else chatContainer.appendChild(msgDiv);
+            chatContainer.insertBefore(msgDiv,indicator);else chatContainer.appendChild(msgDiv);
             chatContainer.scrollTop=chatContainer.scrollHeight;
             sendSeenIfVisible();
+            setupReplyListener(msgDiv);
         }
         
         function appendMessage(text,type){
@@ -1201,25 +1300,35 @@ if (!force) {
             if(type==='sent')markSent();
             const msgDiv=document.createElement('div');
             msgDiv.className=`message ${type}`;
+            
+            let quoteEl = null;
+            if(currentQuote && type !== 'system') { quoteEl = createQuoteElement(currentQuote); currentQuote = null; }
+
             if(type!=='system'){
+                if(quoteEl) msgDiv.appendChild(quoteEl);
                 const span=document.createElement('span');
                 span.className='text-content';
                 span.textContent = text;
                 msgDiv.appendChild(span);
                 msgDiv.appendChild(createMetaElement(type==='sent'));
             } else { msgDiv.textContent=text; }
-            const indicator=document.getElementById('typing-indicator');
+           const indicator=document.getElementById('typing-indicator');
             if(indicator)chatContainer.insertBefore(msgDiv,indicator);else chatContainer.appendChild(msgDiv);
             chatContainer.scrollTop=chatContainer.scrollHeight;
+            setupReplyListener(msgDiv);
         }
         
-        function appendMediaMessage(src,type,sender,id=null,isLoading=false){if(sender==='sent')markSent();const msgDiv=document.createElement('div');msgDiv.className=`message ${sender}`;msgDiv.style.padding='5px';if(id)msgDiv.id=id;const container=document.createElement('div');container.className='media-container';if(isLoading){const loader=document.createElement('div');loader.className='media-loader';loader.innerHTML='<div class="spinner" style="display:block; border-top-color: var(--accent-blue); width: 30px; height: 30px;"></div>';container.appendChild(loader)}const el=document.createElement(type==='image'?'img':'video');el.className='media-content';el.setAttribute('draggable','false');el.setAttribute('oncontextmenu','return false;');el.style.pointerEvents='none';if(type==='video'){el.setAttribute('disablePictureInPicture','true');el.setAttribute('controlsList','nodownload nofullscreen noremoteplayback');}if(src){el.src=src}else{el.style.display='none'}container.onclick=()=>{if(document.body.classList.contains('privacy-mode-active'))return;if(!el.src)return;if(!el.classList.contains('revealed'))el.classList.add('revealed');else showFullScreen(el.src,type)};container.appendChild(el);msgDiv.appendChild(container);msgDiv.appendChild(createMetaElement(sender==='sent'));const indicator=document.getElementById('typing-indicator');if(indicator)chatContainer.insertBefore(msgDiv,indicator);else chatContainer.appendChild(msgDiv);chatContainer.scrollTop=chatContainer.scrollHeight;if(!isLoading)sendSeenIfVisible();}
+function appendMediaMessage(src,type,sender,id=null,isLoading=false){if(sender==='sent')markSent();const msgDiv=document.createElement('div');msgDiv.className=`message ${sender}`;msgDiv.style.padding='5px';if(id)msgDiv.id=id;
+            let quoteEl = null;
+            if(currentQuote) { quoteEl = createQuoteElement(currentQuote); currentQuote = null; }
+            if(quoteEl) msgDiv.appendChild(quoteEl);
+            const container=document.createElement('div');document.createElement('div');container.className='media-container';if(isLoading){const loader=document.createElement('div');loader.className='media-loader';loader.innerHTML='<div class="spinner" style="display:block; border-top-color: var(--accent-blue); width: 30px; height: 30px;"></div>';container.appendChild(loader)}const el=document.createElement(type==='image'?'img':'video');el.className='media-content';el.setAttribute('draggable','false');el.setAttribute('oncontextmenu','return false;');el.style.pointerEvents='none';if(type==='video'){el.setAttribute('disablePictureInPicture','true');el.setAttribute('controlsList','nodownload nofullscreen noremoteplayback');}if(src){el.src=src}else{el.style.display='none'}container.onclick=()=>{if(document.body.classList.contains('privacy-mode-active'))return;if(!el.src)return;if(!el.classList.contains('revealed'))el.classList.add('revealed');else showFullScreen(el.src,type)};container.appendChild(el);msgDiv.appendChild(container);msgDiv.appendChild(createMetaElement(sender==='sent'));const indicator=document.getElementById('typing-indicator');if(indicator)chatContainer.insertBefore(msgDiv,indicator);else chatContainer.appendChild(msgDiv);chatContainer.scrollTop=chatContainer.scrollHeight;if(!isLoading)sendSeenIfVisible();setupReplyListener(msgDiv);}
         
         function updateMediaMessage(id,src){const msgDiv=document.getElementById(id);if(!msgDiv)return;const loader=msgDiv.querySelector('.media-loader');const el=msgDiv.querySelector('.media-content');if(loader)loader.remove();if(src&&el){el.src=src;el.style.display='block';}chatContainer.scrollTop=chatContainer.scrollHeight;sendSeenIfVisible();}
         function showFullScreen(src,type){const viewer=document.getElementById('media-viewer');viewer.innerHTML='';const el=document.createElement(type==='image'?'img':'video');el.src=src;el.setAttribute('draggable','false');el.setAttribute('oncontextmenu','return false;');if(type==='video'){el.controls=true;el.setAttribute('disablePictureInPicture','true');el.setAttribute('controlsList','nodownload nofullscreen noremoteplayback');}viewer.appendChild(el);viewer.style.display='flex'}
         
         msgInput.addEventListener('input',()=>{if(!conn?.open)return;conn.send('WHISPER_TYPING_ON');clearTimeout(typingTimeout);typingTimeout=setTimeout(()=>conn.send('WHISPER_TYPING_OFF'),2000)});
-        msgInput.addEventListener('keypress',(e)=>{if(e.key==='Enter'&&msgInput.value.trim()!==''&&conn?.open){const val=msgInput.value.trim();conn.send('WHISPER_TYPING_OFF');conn.send(val);appendMessage(val,'sent');msgInput.value='';clearTimeout(typingTimeout)}});
+        msgInput.addEventListener('keypress',(e)=>{if(e.key==='Enter'&&msgInput.value.trim()!==''&&conn?.open){const val=msgInput.value.trim();conn.send('WHISPER_TYPING_OFF');let payload = val; if(replyingTo) { currentQuote = replyingTo; payload = 'WHISPER_REPLY|' + btoa(unescape(encodeURIComponent(JSON.stringify(replyingTo)))) + '|' + val; } conn.send(payload);appendMessage(val,'sent');msgInput.value='';clearTimeout(typingTimeout);cancelReply();}});
         
         fileInput.addEventListener('change',(e)=>{
             const file=e.target.files[0];
@@ -1227,11 +1336,15 @@ if (!force) {
             const reader=new FileReader();
             const type=file.type.startsWith('video/')?'video':'image';
             const msgId='MED_'+Date.now()+Math.random().toString(36).substr(2,5);
-            reader.onload=async (ev)=>{
+reader.onload=async (ev)=>{
                 let dataUrl=ev.target.result;
                 if (type==='image' && pMeta.checked) { dataUrl = await stripImageMetadata(dataUrl, file.type); }
+                if(replyingTo) currentQuote = replyingTo;
                 appendMediaMessage(dataUrl,type,'sent',msgId,true);
-                conn.send('WHISPER_MEDIA_START|'+msgId+'|'+type);
+                let startPayload = 'WHISPER_MEDIA_START|'+msgId+'|'+type;
+                if(replyingTo) { startPayload = 'WHISPER_REPLY|' + btoa(unescape(encodeURIComponent(JSON.stringify(replyingTo)))) + '|' + startPayload; }
+                conn.send(startPayload);
+                cancelReply();
                 setTimeout(()=>{ conn.send('WHISPER_MEDIA_DATA|'+msgId+'|'+dataUrl); },50);
             };
             reader.readAsDataURL(file);
