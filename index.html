@@ -377,11 +377,10 @@
             #feedback-view h2 { 
                 white-space: nowrap; 
             }
-            #feedback-view .instruction-header { 
+           #feedback-view .instruction-header { 
                 padding-left: 15px; 
                 padding-right: 15px; 
             }
-        }
         }
      body.privacy-mode-active .message:not(.system) .text-content {
             color: transparent !important;
@@ -1252,7 +1251,7 @@ if (!force) {
             if(document.visibilityState!=='visible'){unseenCount++;updateTitle()}
         }
         
-        function showTypingIndicator(show){const indicator=document.getElementById('typing-indicator');if(indicator){indicator.style.display=show?'block':'none';if(show)chatContainer.scrollTop=chatContainer.scrollHeight}}
+        function showTypingIndicator(show){if(indicator){indicator.style.display=show?'block':'none';if(show)chatContainer.scrollTop=chatContainer.scrollHeight}}
         function sendHello(){if(!conn?.open)return;conn.send("Hello 👋");appendMessage("Hello 👋",'sent')}
         function markSent(){localUserSentMessage=true;suggestionContainer.style.display='none'}
         
@@ -1289,7 +1288,7 @@ if (!force) {
             msgDiv.appendChild(container);
             msgDiv.appendChild(createMetaElement(sender==='sent'));
             const indicator=document.getElementById('typing-indicator');
-            chatContainer.insertBefore(msgDiv,indicator);else chatContainer.appendChild(msgDiv);
+            if(indicator) chatContainer.insertBefore(msgDiv,indicator); else chatContainer.appendChild(msgDiv);
             chatContainer.scrollTop=chatContainer.scrollHeight;
             sendSeenIfVisible();
             setupReplyListener(msgDiv);
@@ -1322,7 +1321,7 @@ function appendMediaMessage(src,type,sender,id=null,isLoading=false){if(sender==
             let quoteEl = null;
             if(currentQuote) { quoteEl = createQuoteElement(currentQuote); currentQuote = null; }
             if(quoteEl) msgDiv.appendChild(quoteEl);
-            const container=document.createElement('div');document.createElement('div');container.className='media-container';if(isLoading){const loader=document.createElement('div');loader.className='media-loader';loader.innerHTML='<div class="spinner" style="display:block; border-top-color: var(--accent-blue); width: 30px; height: 30px;"></div>';container.appendChild(loader)}const el=document.createElement(type==='image'?'img':'video');el.className='media-content';el.setAttribute('draggable','false');el.setAttribute('oncontextmenu','return false;');el.style.pointerEvents='none';if(type==='video'){el.setAttribute('disablePictureInPicture','true');el.setAttribute('controlsList','nodownload nofullscreen noremoteplayback');}if(src){el.src=src}else{el.style.display='none'}container.onclick=()=>{if(document.body.classList.contains('privacy-mode-active'))return;if(!el.src)return;if(!el.classList.contains('revealed'))el.classList.add('revealed');else showFullScreen(el.src,type)};container.appendChild(el);msgDiv.appendChild(container);msgDiv.appendChild(createMetaElement(sender==='sent'));const indicator=document.getElementById('typing-indicator');if(indicator)chatContainer.insertBefore(msgDiv,indicator);else chatContainer.appendChild(msgDiv);chatContainer.scrollTop=chatContainer.scrollHeight;if(!isLoading)sendSeenIfVisible();setupReplyListener(msgDiv);}
+            const container=document.createElement('div');container.className='media-container';if(isLoading){const loader=document.createElement('div');loader.className='media-loader';loader.innerHTML='<div class="spinner" style="display:block; border-top-color: var(--accent-blue); width: 30px; height: 30px;"></div>';container.appendChild(loader)}const el=document.createElement(type==='image'?'img':'video');el.className='media-content';el.setAttribute('draggable','false');el.setAttribute('oncontextmenu','return false;');el.style.pointerEvents='none';if(type==='video'){el.setAttribute('disablePictureInPicture','true');el.setAttribute('controlsList','nodownload nofullscreen noremoteplayback');}if(src){el.src=src}else{el.style.display='none'}container.onclick=()=>{if(document.body.classList.contains('privacy-mode-active'))return;if(!el.src)return;if(!el.classList.contains('revealed'))el.classList.add('revealed');else showFullScreen(el.src,type)};container.appendChild(el);msgDiv.appendChild(container);msgDiv.appendChild(createMetaElement(sender==='sent'));const indicator=document.getElementById('typing-indicator');if(indicator)chatContainer.insertBefore(msgDiv,indicator);else chatContainer.appendChild(msgDiv);chatContainer.scrollTop=chatContainer.scrollHeight;if(!isLoading)sendSeenIfVisible();setupReplyListener(msgDiv);}
         
         function updateMediaMessage(id,src){const msgDiv=document.getElementById(id);if(!msgDiv)return;const loader=msgDiv.querySelector('.media-loader');const el=msgDiv.querySelector('.media-content');if(loader)loader.remove();if(src&&el){el.src=src;el.style.display='block';}chatContainer.scrollTop=chatContainer.scrollHeight;sendSeenIfVisible();}
         function showFullScreen(src,type){const viewer=document.getElementById('media-viewer');viewer.innerHTML='';const el=document.createElement(type==='image'?'img':'video');el.src=src;el.setAttribute('draggable','false');el.setAttribute('oncontextmenu','return false;');if(type==='video'){el.controls=true;el.setAttribute('disablePictureInPicture','true');el.setAttribute('controlsList','nodownload nofullscreen noremoteplayback');}viewer.appendChild(el);viewer.style.display='flex'}
