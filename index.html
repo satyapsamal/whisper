@@ -1128,7 +1128,8 @@ async function toggleScreenShare() {
             if (!isScreenSharing && remoteIsScreenSharing) { showScreenshareConflict(); return; }
             if (isScreenSharing) { stopScreenShare(); return; }
             try {
-                screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+                // FIX: prevent the caller's incoming voice from being captured by system audio
+                screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: { suppressLocalAudioPlayback: true } });
                 const videoTrack = screenStream.getVideoTracks()[0];
                 const senders = currentCall.peerConnection.getSenders();
                 
@@ -1153,7 +1154,9 @@ async function toggleScreenShare() {
                 
                 callOverlay.style.display = 'none';
                 document.getElementById('screenshare-overlay').style.display = 'flex';
-                document.getElementById('screenshare-video').srcObject = screenStream;
+                const svLocal = document.getElementById('screenshare-video');
+                svLocal.muted = true; // FIX: Mute local preview to prevent local speaker echo loop
+                svLocal.srcObject = screenStream;
                 isScreenSharing = true;
                 
                 const isMob = window.innerWidth <= 768;
@@ -1216,7 +1219,7 @@ if (!force) {
             if(data==='WHISPER_TYPING_ON'){showTypingIndicator(true);return}
             if(data==='WHISPER_TYPING_OFF'){showTypingIndicator(false);return}
         if(data==='WHISPER_SCREENSHOT'){showScreenshotNotification();return}
-           if(data==='WHISPER_SCREENSHARE_START'){remoteIsScreenSharing=true;callOverlay.style.display='none';document.getElementById('screenshare-overlay').style.display='flex';                 if(currentCall&&currentCall.peerConnection){                     const receivers = currentCall.peerConnection.getReceivers();                     const videoReceiver = receivers.find(r => r.track && r.track.kind === 'video');                     const sv = document.getElementById('screenshare-video');                     if (videoReceiver && videoReceiver.track) { sv.srcObject = new MediaStream([videoReceiver.track]); sv.play().catch(e=>{}); }                     else if(currentCall.remoteStream) { sv.srcObject=currentCall.remoteStream; sv.play().catch(e=>{}); }                                          currentCall.peerConnection.addEventListener('track', (e) => {                         if (e.track.kind === 'video') { sv.srcObject = e.streams[0] || new MediaStream([e.track]); sv.play().catch(er=>{}); }                     });                 }                 const isMob = window.innerWidth <= 768; const scCap = document.querySelector('.screenshare-capsule'); if (isMob && scCap) { scCap.classList.remove('compact'); if (mobileCapsuleTimer) clearTimeout(mobileCapsuleTimer); mobileCapsuleTimer = setTimeout(() => { scCap.classList.add('compact'); }, 5000); } return;}
+        if(data==='WHISPER_SCREENSHARE_START'){remoteIsScreenSharing=true;callOverlay.style.display='none';document.getElementById('screenshare-overlay').style.display='flex';                 if(currentCall&&currentCall.peerConnection){                     const receivers = currentCall.peerConnection.getReceivers();                     const videoReceiver = receivers.find(r => r.track && r.track.kind === 'video');                     const sv = document.getElementById('screenshare-video');                     sv.muted = false;                     if (videoReceiver && videoReceiver.track) { sv.srcObject = new MediaStream([videoReceiver.track]); sv.play().catch(e=>{}); }                     else if(currentCall.remoteStream) { sv.srcObject=currentCall.remoteStream; sv.play().catch(e=>{}); }                                          currentCall.peerConnection.addEventListener('track', (e) => {                         if (e.track.kind === 'video') { sv.srcObject = e.streams[0] || new MediaStream([e.track]); sv.play().catch(er=>{}); }                     });                 }                 const isMob = window.innerWidth <= 768; const scCap = document.querySelector('.screenshare-capsule'); if (isMob && scCap) { scCap.classList.remove('compact'); if (mobileCapsuleTimer) clearTimeout(mobileCapsuleTimer); mobileCapsuleTimer = setTimeout(() => { scCap.classList.add('compact'); }, 5000); } return;}
             if(data==='WHISPER_SCREENSHARE_STOP'){remoteIsScreenSharing=false;document.getElementById('screenshare-overlay').style.display='none';callOverlay.style.display='flex';return;}
             if(typeof data==='string'){
                 if(data.startsWith('WHISPER_MEDIA_START|')){
