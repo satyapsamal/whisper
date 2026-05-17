@@ -152,7 +152,7 @@
         @keyframes modalPop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
         #media-viewer{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.95);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(10px)}
         #media-viewer img,#media-viewer video{max-width:95%;max-height:90%;border-radius:10px}
-        .viewer-encryption-badge{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);background:rgba(30,30,30,.65);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:8px 18px;border-radius:30px;font-size:.75rem;font-weight:600;color:#eee;z-index:210;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 4px 20px rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.08);pointer-events:none;letter-spacing:.5px}
+        .viewer-encryption-badge{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);background:rgba(30,30,30,.65);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:8px 18px;border-radius:30px;font-size:.75rem;font-weight:600;color:#eee;z-index:210;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 4px 20px rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.08);pointer-events:none;letter-spacing:.5px;white-space:nowrap;width:max-content;max-width:95vw}
         .viewer-encryption-badge svg{width:12px;height:12px;fill:currentColor;opacity:.8}
         .modal-content{position:relative}
         
@@ -357,8 +357,7 @@
         #feedback-view { display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:var(--modal-bg); z-index:20; border-radius:35px; padding:0; flex-direction:column; text-align:left; overflow:hidden; }
 
         @media (max-width: 768px) {
-            .encryption-capsule { min-width: auto; }
-            .voice-capsule { white-space: nowrap; width: max-content; }
+            .encryption-capsule { min-width: auto; white-space: nowrap; width: max-content; max-width: 95vw; }
 .video-capsule, .screenshare-capsule { 
                 top: calc(100% - 170px); 
                 transition: top 0.8s cubic-bezier(0.25, 1, 0.5, 1), padding 0.5s ease; 
