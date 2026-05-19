@@ -1137,9 +1137,9 @@ async function toggleScreenShare() {
             if (!currentCall || !currentCall.peerConnection) return;
             if (!isScreenSharing && remoteIsScreenSharing) { showScreenshareConflict(); return; }
             if (isScreenSharing) { stopScreenShare(); return; }
-           try {
-                // Audio is set to true without suppression so the presenter can hear what they are sharing.
-                screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+            try {
+                // FIX: prevent the caller's incoming voice from being captured by system audio
+                screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: { suppressLocalAudioPlayback: true } });
                 const videoTrack = screenStream.getVideoTracks()[0];
                 const senders = currentCall.peerConnection.getSenders();
                 
