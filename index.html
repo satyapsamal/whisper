@@ -436,6 +436,31 @@
             user-select: none !important;
             -webkit-user-select: none !important;
         }
+        .message { position: relative; }
+        .reply-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(40, 40, 40, 0.9);
+            border: 1px solid #555;
+            color: white;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+            z-index: 5;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .message.sent .reply-btn { left: -45px; }
+        .message.received .reply-btn { right: -45px; }
+        .message:hover .reply-btn { opacity: 1; }
+        .reply-btn:hover { background: var(--accent-blue); border-color: var(--accent-blue); transform: translateY(-50%) scale(1.1); }
+        @media (max-width: 768px) { .reply-btn { display: none !important; } }
     </style>
 </head>
 <body class="modal-active">
@@ -981,7 +1006,7 @@
         function setCallTitle(){stopFlasher();document.title="Call in Progress | Whisper"}
        function startOfflineCountdown(){if(offlineTimer)clearInterval(offlineTimer);secondsLeft=180;connectionStatus.textContent=`(Offline | Chat closes in ${secondsLeft}s)`;offlineTimer=setInterval(()=>{if(currentCall)return;secondsLeft--;connectionStatus.textContent=`(Offline | Chat closes in ${secondsLeft}s)`;if(secondsLeft<=0){clearInterval(offlineTimer);appendMessage("Chat closed. Link expired.",'system');handleDisconnect()}},1000)}
         function updatePeerStatus(isOnline){if(isOnline){connectionStatus.textContent="(Online)";connectionStatus.classList.add('online');if(offlineTimer){clearInterval(offlineTimer);offlineTimer=null}}else{connectionStatus.classList.remove('online');if(!currentCall)startOfflineCountdown()}}
-        for(let i=0;i<25;i++){const bar=document.createElement('div');bar.className='v-bar';visualizer.appendChild(bar)}
+        for(let i=0;i<25;i++){const bar=document.createElement('div');bar.className='pb-bar';visualizer.appendChild(bar)}
         function getCurrentTime(){const now=new Date();return now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
         
         function createMetaElement(isSent){
@@ -1081,32 +1106,64 @@
             qDiv.innerHTML = `<div class="quote-sender">${displaySender}</div><div class="quote-text">${quote.content}</div>`;
             return qDiv;
         }
-
-        function setupReplyListener(msgDiv) {
+function setupReplyListener(msgDiv) {
             if(msgDiv.classList.contains('system')) return;
-            msgDiv.addEventListener('click', (e) => {
-                if(window.getSelection().toString().length > 0) return;
+            
+            // Desktop Hover Button
+            const btn = document.createElement('button');
+            btn.className = 'reply-btn';
+            btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" fill="currentColor"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg>';
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                triggerReply(msgDiv);
+            };
+            msgDiv.appendChild(btn);
+
+            // Mobile 3-Second Long Press
+            let pressTimer;
+            let startY;
+            const cancelPress = () => { clearTimeout(pressTimer); };
+            
+msgDiv.addEventListener('touchstart', (e) => {
+                if(e.touches.length > 1) return; // ignore multi-touch
+                
+                // Prevent interactive elements (play buttons, images) from triggering the long-press reply
                 if(e.target.closest('button') || e.target.closest('audio') || e.target.closest('video') || e.target.closest('.media-content') || e.target.closest('.msg-quote')) return;
-                
-                let qType = 'text';
-                let qContent = '';
-                if(msgDiv.querySelector('.text-content')) {
-                    qContent = msgDiv.querySelector('.text-content').textContent;
-                } else if (msgDiv.querySelector('.media-content')) {
-                    qType = msgDiv.querySelector('.media-content').tagName.toLowerCase() === 'img' ? 'image' : 'video';
-                    qContent = qType === 'image' ? '📷 Photo' : '🎥 Video';
-                } else if (msgDiv.querySelector('.audio-bubble')) {
-                    qType = 'audio';
-                    qContent = '🎤 Voice Message';
-                }
-                
-replyingTo = {
-                    sender: msgDiv.classList.contains('sent') ? 'You' : 'Anonymous',
-                    type: qType,
-                    content: qContent.length > 60 ? qContent.substring(0, 60) + '...' : qContent
-                };
-                showReplyPreview();
-            });
+
+                startY = e.touches[0].clientY;
+                pressTimer = setTimeout(() => {
+                    if(navigator.vibrate) navigator.vibrate(50);
+                    triggerReply(msgDiv);
+                }, 3000);
+            }, {passive: true});
+            
+            msgDiv.addEventListener('touchmove', (e) => {
+                if(Math.abs(e.touches[0].clientY - startY) > 10) cancelPress(); // cancel if scrolling
+            }, {passive: true});
+            
+            msgDiv.addEventListener('touchend', cancelPress);
+            msgDiv.addEventListener('touchcancel', cancelPress);
+        }
+
+        function triggerReply(msgDiv) {
+            let qType = 'text';
+            let qContent = '';
+            if(msgDiv.querySelector('.text-content')) {
+                qContent = msgDiv.querySelector('.text-content').textContent;
+            } else if (msgDiv.querySelector('.media-content')) {
+                qType = msgDiv.querySelector('.media-content').tagName.toLowerCase() === 'img' ? 'image' : 'video';
+                qContent = qType === 'image' ? '📷 Photo' : '🎥 Video';
+            } else if (msgDiv.querySelector('.audio-bubble')) {
+                qType = 'audio';
+                qContent = '🎤 Voice Message';
+            }
+            
+            replyingTo = {
+                sender: msgDiv.classList.contains('sent') ? 'You' : 'Anonymous',
+                type: qType,
+                content: qContent.length > 60 ? qContent.substring(0, 60) + '...' : qContent
+            };
+            showReplyPreview();
         }
         let isScreenSharing = false;
 
@@ -1138,8 +1195,7 @@ async function toggleScreenShare() {
             if (!isScreenSharing && remoteIsScreenSharing) { showScreenshareConflict(); return; }
             if (isScreenSharing) { stopScreenShare(); return; }
             try {
-                // FIX: prevent the caller's incoming voice from being captured by system audio
-                screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: { suppressLocalAudioPlayback: true } });
+                // FIX: Allows sharer to hear system audio locally, while utilizing WebRTC Echo Cancellation to subtract the call out of the system stream                 screenStream = await navigator.mediaDevices.getDisplayMedia({                      video: true,                      audio: {                          echoCancellation: true,                          noiseSuppression: false,                          autoGainControl: false,                          suppressLocalAudioPlayback: false                      }                  });
                 const videoTrack = screenStream.getVideoTracks()[0];
                 const senders = currentCall.peerConnection.getSenders();
                 
@@ -1229,7 +1285,41 @@ if (!force) {
             if(data==='WHISPER_TYPING_ON'){showTypingIndicator(true);return}
             if(data==='WHISPER_TYPING_OFF'){showTypingIndicator(false);return}
         if(data==='WHISPER_SCREENSHOT'){showScreenshotNotification();return}
-        if(data==='WHISPER_SCREENSHARE_START'){remoteIsScreenSharing=true;callOverlay.style.display='none';document.getElementById('screenshare-overlay').style.display='flex';                 if(currentCall&&currentCall.peerConnection){                     const receivers = currentCall.peerConnection.getReceivers();                     const videoReceiver = receivers.find(r => r.track && r.track.kind === 'video');                     const sv = document.getElementById('screenshare-video');                     sv.muted = false;                     if (videoReceiver && videoReceiver.track) { sv.srcObject = new MediaStream([videoReceiver.track]); sv.play().catch(e=>{}); }                     else if(currentCall.remoteStream) { sv.srcObject=currentCall.remoteStream; sv.play().catch(e=>{}); }                                          currentCall.peerConnection.addEventListener('track', (e) => {                         if (e.track.kind === 'video') { sv.srcObject = e.streams[0] || new MediaStream([e.track]); sv.play().catch(er=>{}); }                     });                 }                 const isMob = window.innerWidth <= 768; const scCap = document.querySelector('.screenshare-capsule'); if (isMob && scCap) { scCap.classList.remove('compact'); if (mobileCapsuleTimer) clearTimeout(mobileCapsuleTimer); mobileCapsuleTimer = setTimeout(() => { scCap.classList.add('compact'); }, 5000); } return;}
+if(data==='WHISPER_SCREENSHARE_START'){
+            remoteIsScreenSharing=true;
+            callOverlay.style.display='none';
+            document.getElementById('screenshare-overlay').style.display='flex';
+            if(currentCall && currentCall.peerConnection){
+                const receivers = currentCall.peerConnection.getReceivers();
+                const videoReceiver = receivers.find(r => r.track && r.track.kind === 'video');
+                const sv = document.getElementById('screenshare-video');
+                
+                // FIX: Keep muted = true to prevent double playback and loopback on the remote side
+                sv.muted = true; 
+                
+                if (videoReceiver && videoReceiver.track) { 
+                    sv.srcObject = new MediaStream([videoReceiver.track]); 
+                    sv.play().catch(e=>{}); 
+                } else if(currentCall.remoteStream) { 
+                    sv.srcObject = currentCall.remoteStream; 
+                    sv.play().catch(e=>{}); 
+                }
+                currentCall.peerConnection.addEventListener('track', (e) => {
+                    if (e.track.kind === 'video') { 
+                        sv.srcObject = e.streams[0] || new MediaStream([e.track]); 
+                        sv.play().catch(er=>{}); 
+                    }
+                });
+            }
+            const isMob = window.innerWidth <= 768; 
+            const scCap = document.querySelector('.screenshare-capsule'); 
+            if (isMob && scCap) { 
+                scCap.classList.remove('compact'); 
+                if (mobileCapsuleTimer) clearTimeout(mobileCapsuleTimer); 
+                mobileCapsuleTimer = setTimeout(() => { scCap.classList.add('compact'); }, 5000); 
+            } 
+            return;
+        }
             if(data==='WHISPER_SCREENSHARE_STOP'){remoteIsScreenSharing=false;document.getElementById('screenshare-overlay').style.display='none';callOverlay.style.display='flex';return;}
             if(typeof data==='string'){
                 if(data.startsWith('WHISPER_MEDIA_START|')){
@@ -1264,12 +1354,12 @@ if (!force) {
             if(document.visibilityState!=='visible'){unseenCount++;updateTitle()}
         }
         
-        function showTypingIndicator(show){if(indicator){indicator.style.display=show?'block':'none';if(show)chatContainer.scrollTop=chatContainer.scrollHeight}}
+        function showTypingIndicator(show){if(typingIndicator){typingIndicator.style.display=show?'block':'none';if(show)chatContainer.scrollTop=chatContainer.scrollHeight}}
         function sendHello(){if(!conn?.open)return;conn.send("Hello 👋");appendMessage("Hello 👋",'sent')}
         function markSent(){localUserSentMessage=true;suggestionContainer.style.display='none'}
         
-        async function startRecording(){if(!conn?.open)return;try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});mediaRecorder=new MediaRecorder(stream);audioChunks=[];audioContext=new (window.AudioContext||window.webkitAudioContext)();const source=audioContext.createMediaStreamSource(stream);analyser=audioContext.createAnalyser();analyser.fftSize=64;source.connect(analyser);dataArray=new Uint8Array(analyser.frequencyBinCount);mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);mediaRecorder.onstop=()=>{const audioBlob=new Blob(audioChunks,{type:'audio/webm'});const reader=new FileReader();reader.onload=()=>{let payload = 'WHISPER_AUD_'+reader.result; if(replyingTo) { currentQuote = replyingTo; payload = 'WHISPER_REPLY|' + btoa(unescape(encodeURIComponent(JSON.stringify(replyingTo)))) + '|' + payload; } conn.send(payload);appendAudioMessage(reader.result,'sent');cancelReply();};reader.readAsDataURL(audioBlob);stream.getTracks().forEach(t=>t.stop())};mediaRecorder.start();startTime=Date.now();normalMode.style.display='none';voiceMode.style.display='flex';recordInterval=setInterval(()=>{const elapsed=(Date.now()-startTime)/1000;timerDisplay.textContent=`${Math.floor(elapsed/60)}:${Math.floor(elapsed%60).toString().padStart(2,'0')}`;if(elapsed>=60)stopRecording(true)},100);animateVisualizer()}catch(err){}}
-        function animateVisualizer(){if(!analyser)return;animationFrame=requestAnimationFrame(animateVisualizer);analyser.getByteFrequencyData(dataArray);const bars=document.querySelectorAll('.v-bar');bars.forEach((bar,i)=>{const index=Math.floor((i/bars.length)*(dataArray.length/2));const val=dataArray[index];bar.style.height=`${Math.max(4,(val/255)*26)}px`})}
+        async function startRecording(){if(!conn?.open)return;try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});mediaRecorder=new MediaRecorder(stream);audioChunks=[];audioContext=new (window.AudioContext||window.webkitAudioContext)();const source=audioContext.createMediaStreamSource(stream);analyser=audioContext.createAnalyser();analyser.fftSize=256;source.connect(analyser);dataArray=new Uint8Array(analyser.fftSize);mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);mediaRecorder.onstop=()=>{const audioBlob=new Blob(audioChunks,{type:'audio/webm'});const reader=new FileReader();reader.onload=()=>{let payload = 'WHISPER_AUD_'+reader.result; if(replyingTo) { currentQuote = replyingTo; payload = 'WHISPER_REPLY|' + btoa(unescape(encodeURIComponent(JSON.stringify(replyingTo)))) + '|' + payload; } conn.send(payload);appendAudioMessage(reader.result,'sent');cancelReply();};reader.readAsDataURL(audioBlob);stream.getTracks().forEach(t=>t.stop())};mediaRecorder.start();startTime=Date.now();normalMode.style.display='none';voiceMode.style.display='flex';recordInterval=setInterval(()=>{const elapsed=(Date.now()-startTime)/1000;timerDisplay.textContent=`${Math.floor(elapsed/60)}:${Math.floor(elapsed%60).toString().padStart(2,'0')}`;if(elapsed>=60)stopRecording(true)},100);animateVisualizer()}catch(err){}}
+        function animateVisualizer() {             if(!analyser) return;             animationFrame = requestAnimationFrame(animateVisualizer);             analyser.getByteTimeDomainData(dataArray);                          const bars = document.querySelectorAll('#visualizer .pb-bar');             const chunkSize = Math.floor(dataArray.length / bars.length);                          bars.forEach((bar, i) => {                 let sum = 0;                 for(let j=0; j<chunkSize; j++) {                     let v = (dataArray[i * chunkSize + j] - 128) / 128;                     sum += Math.abs(v);                 }                 let avg = sum / chunkSize;                 let targetHeight = Math.max(4, avg * 300); // Scale amplitude up                 if(targetHeight > 26) targetHeight = 26; // Cap height                 bar.style.height = `${targetHeight}px`;             });         }
         function stopRecording(send){normalMode.style.display='flex';voiceMode.style.display='none';clearInterval(recordInterval);cancelAnimationFrame(animationFrame);if(audioContext)audioContext.close();if(mediaRecorder&&mediaRecorder.state!=='inactive'){if(send)mediaRecorder.stop();else{mediaRecorder.onstop=null;mediaRecorder.stop();mediaRecorder.stream.getTracks().forEach(t=>t.stop())}}}
         
         function appendAudioMessage(src,sender){
@@ -1339,8 +1429,50 @@ let quoteEl = null;
         function updateMediaMessage(id,src){const msgDiv=document.getElementById(id);if(!msgDiv)return;const loader=msgDiv.querySelector('.media-loader');const el=msgDiv.querySelector('.media-content');if(loader)loader.remove();if(src&&el){el.src=src;el.style.display='block';}chatContainer.scrollTop=chatContainer.scrollHeight;sendSeenIfVisible();}
         function showFullScreen(src,type){const viewer=document.getElementById('media-viewer');viewer.innerHTML='';const el=document.createElement(type==='image'?'img':'video');el.src=src;el.setAttribute('draggable','false');el.setAttribute('oncontextmenu','return false;');if(type==='video'){el.controls=true;el.setAttribute('disablePictureInPicture','true');el.setAttribute('controlsList','nodownload nofullscreen noremoteplayback');}viewer.appendChild(el);const badge=document.createElement('div');badge.className='viewer-encryption-badge';badge.innerHTML='<svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/></svg><span>End-to-End Encrypted</span>';viewer.appendChild(badge);viewer.style.display='flex'}
         
-        msgInput.addEventListener('input',()=>{if(!conn?.open)return;conn.send('WHISPER_TYPING_ON');clearTimeout(typingTimeout);typingTimeout=setTimeout(()=>conn.send('WHISPER_TYPING_OFF'),2000)});
-        msgInput.addEventListener('keypress',(e)=>{if(e.key==='Enter'&&msgInput.value.trim()!==''&&conn?.open){const val=msgInput.value.trim();conn.send('WHISPER_TYPING_OFF');let payload = val; if(replyingTo) { currentQuote = replyingTo; payload = 'WHISPER_REPLY|' + btoa(unescape(encodeURIComponent(JSON.stringify(replyingTo)))) + '|' + val; } conn.send(payload);appendMessage(val,'sent');msgInput.value='';clearTimeout(typingTimeout);cancelReply();}});
+       let isTyping = false;
+        msgInput.addEventListener('input', () => {
+            if(!conn?.open) return;
+            const val = msgInput.value.trim();
+            
+            if(val === '') {
+                if(isTyping) { 
+                    conn.send('WHISPER_TYPING_OFF'); 
+                    isTyping = false; 
+                    clearTimeout(typingTimeout); 
+                }
+                return;
+            }
+            
+            if(!isTyping) { 
+                conn.send('WHISPER_TYPING_ON'); 
+                isTyping = true; 
+            }
+            
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                conn.send('WHISPER_TYPING_OFF');
+                isTyping = false;
+            }, 2000);
+        });
+        
+        msgInput.addEventListener('keypress', (e) => {
+            if(e.key === 'Enter' && msgInput.value.trim() !== '' && conn?.open){
+                const val = msgInput.value.trim();
+                conn.send('WHISPER_TYPING_OFF');
+                isTyping = false;
+                clearTimeout(typingTimeout);
+                
+                let payload = val; 
+                if(replyingTo) { 
+                    currentQuote = replyingTo; 
+                    payload = 'WHISPER_REPLY|' + btoa(unescape(encodeURIComponent(JSON.stringify(replyingTo)))) + '|' + val; 
+                } 
+                conn.send(payload);
+                appendMessage(val, 'sent');
+                msgInput.value = '';
+                cancelReply();
+            }
+        });
         
         fileInput.addEventListener('change',(e)=>{
             const file=e.target.files[0];
